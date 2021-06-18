@@ -1,9 +1,10 @@
 import '../styles/globals.css';
 import 'tailwindcss/tailwind.css';
 
-import { GeistProvider, CssBaseline } from '@geist-ui/react';
+import { GeistProvider, CssBaseline, Page } from '@geist-ui/react';
 import { useState, useEffect } from 'react';
 import { Provider } from 'next-auth/client';
+import { Header } from '../components/Header';
 
 function MyApp({ Component, pageProps }) {
 	const [themeType, setThemeType] = useState('light');
@@ -29,9 +30,18 @@ function MyApp({ Component, pageProps }) {
 		<GeistProvider themeType={themeType}>
 			<CssBaseline />
 			<Provider session={pageProps.session}>
-				{/* <Navbar /> */}
-				<Component {...pageProps} />
-				{/* <Footer switchTheme={switchThemes} mode={themeType} /> */}
+				<Page>
+					<Page.Header>
+						<Header
+							themeType={themeType}
+							switchTheme={switchThemes}
+						/>
+					</Page.Header>
+					<Page.Content>
+						<Component {...pageProps} />
+					</Page.Content>
+					{/* <Footer switchTheme={switchThemes} mode={themeType} /> */}
+				</Page>
 			</Provider>
 		</GeistProvider>
 	);
