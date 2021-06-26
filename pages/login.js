@@ -1,7 +1,6 @@
 import { Text, Button, Grid, Input } from '@geist-ui/react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { BASE_URL } from '../lib/url';
-import { FcGoogle } from 'react-icons/fc';
 import { LogIn, User, Lock, AlertCircle } from '@geist-ui/react-icons';
 import { signin, useSession } from 'next-auth/client';
 import { useRouter } from 'next/router';
@@ -18,14 +17,6 @@ function Login() {
 		console.log(session);
 		if (session) router.push('/');
 	}, [session]);
-
-	const Google_Login_Button = (props) => {
-		return (
-			<Button type="secondary" shadow onClick={props.onClick}>
-				<FcGoogle />
-			</Button>
-		);
-	};
 
 	const emailCallback = useCallback(
 		(e) => {
@@ -115,16 +106,6 @@ function Login() {
 						</div>
 					</Button>
 				</Grid>
-				{/* <Grid> */}
-				{/* googlelogin */}
-				{/* <GoogleLogin
-						render={(props) => Google_Login_Button(props)}
-						clientId={process.env.NEXT_PUBLIC_GOOGLE_OAUTH_KEY}
-						onSuccess={(resp) => oauth_login(resp, 'google')}
-						onFailure={(resp) => console.log(resp)}
-						cookiePolicy={'single_host_origin'}
-					/> */}
-				{/* </Grid> */}
 				<Button
 					onClick={() => {
 						signin('google', {

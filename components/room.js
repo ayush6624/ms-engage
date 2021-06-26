@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import Video from 'twilio-video';
 import Participant from './participant';
-import styles from "./room.module.css";
-
+import styles from './room.module.css';
+import { Row, Text, Image, Col, Card, Button } from '@geist-ui/react';
 
 const Room = ({ roomName, token, handleLogout }) => {
 	const [room, setRoom] = useState(null);
@@ -56,9 +56,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 	return (
 		<div className="nes-container with-title is-centered">
 			<p className="title">Room: {roomName}</p>
-			<button className="nes-btn is-primary" onClick={handleLogout}>
-				Log out
-			</button>
+			<button className="nes-btn is-primary">Log out</button>
 			<div className={styles.parent}>
 				{room && (
 					<div className={styles.box}>

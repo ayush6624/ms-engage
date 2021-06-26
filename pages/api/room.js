@@ -1,4 +1,11 @@
 import twilio from 'twilio';
+import {
+	uniqueNamesGenerator,
+	adjectives,
+	colors,
+	animals
+} from 'unique-names-generator';
+
 const AccessToken = twilio.jwt.AccessToken;
 const { VideoGrant } = AccessToken;
 
@@ -20,22 +27,28 @@ const generateToken = (config) => {
 
 const videoToken = (identity, room, config) => {
 	let videoGrant;
+	let uniqueName;
 	if (typeof room !== 'undefined') {
 		videoGrant = new VideoGrant({ room });
 	} else {
-		videoGrant = new VideoGrant();
+		uniqueName = uniqueNamesGenerator({
+			dictionaries: [adjectives, colors, animals],
+			separator: '-',
+			length: 3
+		});
+		videoGrant = new VideoGrant({ room: uniqueName });
 	}
 
 	const token = generateToken(config);
 	token.addGrant(videoGrant);
 	token.identity = identity;
-	return token;
+	return { token, room: room ? room : uniqueName };
 };
 
 export default function handler(req, res) {
 	const identity = req.body.identity;
 	const room = req.body.room;
-	const token = videoToken(identity, room, config);
+	const { token, room: meetingRoom } = videoToken(identity, room, config);
 	res.statusCode = 200;
-	res.json({ token: token.toJwt() });
+	res.json({ token: token.toJwt(), room: meetingRoom, identity });
 }
