@@ -3,16 +3,23 @@
 Mentee: [Ayush Goyal](https://www.github.com/ayush6624) `<ayushg1214@gmail.com>`  
 Mentor #1: Akash Gupta `<akasgup@microsoft.com>`  
 Mentor #2: Lakesh Kumar `<lakesh.kumar@microsoft.com>`
-___
+
+---
+
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
-[![Build CI](https://github.com/ayush6624/ms-engage/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/ayush6624/ms-engage/actions/workflows/main.yml)
-___
+[![Build CI](https://github.com/ayush6624/ms-engage/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/ayush6624/ms-engage/actions/workflows/main.yml)   
+[Agile Board](https://github.com/ayush6624/ms-engage/projects/1)
+
+---
+
 ## Tech Stack
 
 -   NextJS
 -   Javascript
 -   Tailwind CSS
-___
+
+---
+
 ## Run Locally
 
 Clone the project
@@ -40,7 +47,9 @@ Build the website
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
-___
+
+---
+
 ## Running Tests
 
 To run tests, run the following command
@@ -48,7 +57,9 @@ To run tests, run the following command
 ```bash
   npm run test
 ```
-___
+
+---
+
 ## Environment Variables
 
 To run this project, you will need to add the following environment variables to your .env file
@@ -65,8 +76,10 @@ To run this project, you will need to add the following environment variables to
 
 `TWILIO_SECRET`
 
-___
+---
+
 ## API Reference
+
 #### Get all items
 
 ```http
@@ -77,4 +90,3 @@ ___
 | :--------- | :------- | :---------------------------- |
 | `identity` | `string` | **Required**. Unique Identity |
 | `room`     | `string` | **Required**. Room Name       |
-

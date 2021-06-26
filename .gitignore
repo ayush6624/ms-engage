@@ -38,3 +38,5 @@ migrations/
 .env
 
 *.http
+workbox*
+sw.js
