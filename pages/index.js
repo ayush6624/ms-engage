@@ -14,7 +14,7 @@ import {
 import { PlusCircle } from '@geist-ui/react-icons';
 import { useSession } from 'next-auth/client';
 import { useRouter } from 'next/router';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { FaRegKeyboard } from 'react-icons/fa';
 import { MeetingContext } from '../lib/context/token';
 
@@ -23,6 +23,7 @@ export default function Home() {
 	const { push } = useRouter();
 	const [_toasts, setToast] = useToasts();
 	const { setToken } = useContext(MeetingContext);
+	const [joinRoom, setJoinRoom] = useState('');
 
 	const handleSubmit = async (username, roomName) => {
 		const data = await fetch('/api/room', {
@@ -56,11 +57,13 @@ export default function Home() {
 							type="success-light"
 							shadow
 							onClick={async () => {
-								if (session)
-									await handleSubmit(
-										session.user.email.split('@')[0]
-									);
-								else
+								if (session) {
+									await handleSubmit(session.user.name);
+									setToast({
+										text: 'Meeting Started',
+										type: 'success'
+									});
+								} else
 									setToast({
 										text: 'Please log in first!',
 										type: 'error'
@@ -72,13 +75,29 @@ export default function Home() {
 						<Divider y={4} />
 						<form
 							className="flex flex-row justify-between"
-							onSubmit={(e) => console.log('submitted')}
+							onSubmit={async (e) => {
+								e.preventDefault();
+								console.log(e.roomname);
+								if (session) {
+									console.log('joinRoom -> ', joinRoom);
+									setToast({
+										text: 'Meeting Joined Successfully',
+										type: 'success'
+									});
+									push(`/${joinRoom}`);
+								} else
+									setToast({
+										text: 'Please log in first!',
+										type: 'error'
+									});
+							}}
 						>
 							<Input
 								width="90%"
 								icon={<FaRegKeyboard />}
 								placeholder="Room Name"
 								size="large"
+								onChange={(e) => setJoinRoom(e.target.value)}
 							/>
 							<Button
 								htmlType="submit"
@@ -86,6 +105,7 @@ export default function Home() {
 								ghost
 								auto
 								icon={<PlusCircle />}
+								shadow
 							>
 								Join
 							</Button>

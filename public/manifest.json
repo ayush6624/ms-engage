@@ -1,6 +1,6 @@
 {
-	"name": "teams-chat",
-	"short_name": "teams-chat",
+	"name": "Microsoft Teams",
+	"short_name": "Teams",
 	"icons": [
 		{
 			"src": "/logo-128x128.png",
