@@ -5,6 +5,7 @@ import { GeistProvider, CssBaseline, Page } from '@geist-ui/react';
 import { useState, useEffect } from 'react';
 import { Provider } from 'next-auth/client';
 import { Header } from '../components/Header';
+import { MeetingProvider } from '../lib/context/token';
 
 function MyApp({ Component, pageProps }) {
 	const [themeType, setThemeType] = useState('light');
@@ -26,23 +27,27 @@ function MyApp({ Component, pageProps }) {
 			lastThemeType === 'dark' ? 'light' : 'dark'
 		);
 
+	const [token, setToken] = useState('');
+	const [roomName, setRoomName] = useState('');
+
 	return (
 		<GeistProvider themeType={themeType}>
 			<CssBaseline />
-			<Provider session={pageProps.session}>
-				<Page>
-					<Page.Header>
-						<Header
-							themeType={themeType}
-							switchTheme={switchThemes}
-						/>
-					</Page.Header>
-					<Page.Content>
-						<Component {...pageProps} />
-					</Page.Content>
-					{/* <Footer switchTheme={switchThemes} mode={themeType} /> */}
-				</Page>
-			</Provider>
+			<MeetingProvider value={{ token, setToken, roomName, setRoomName }}>
+				<Provider session={pageProps.session}>
+					<Page>
+						<Page.Header>
+							<Header
+								themeType={themeType}
+								switchTheme={switchThemes}
+							/>
+						</Page.Header>
+						<Page.Content>
+							<Component {...pageProps} />
+						</Page.Content>
+					</Page>
+				</Provider>
+			</MeetingProvider>
 		</GeistProvider>
 	);
 }
