@@ -19,12 +19,14 @@ export function Header({ themeType, switchTheme }) {
 	return (
 		<Grid.Container justify="space-between" className="pt-3">
 			<Grid>
-				<Image
-					src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1200px-Microsoft_logo.svg.png"
-					width="40"
-					height="40"
-					alt="logo"
-				/>
+				<button onClick={() => push('/')}>
+					<Image
+						src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1200px-Microsoft_logo.svg.png"
+						width="40"
+						height="40"
+						alt="logo"
+					/>
+				</button>
 			</Grid>
 			<Grid span={5} className="">
 				{!session ? (
