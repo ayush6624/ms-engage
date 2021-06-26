@@ -16,7 +16,9 @@
 		"next-pwa": "^5.2.21",
 		"react": "17.0.2",
 		"react-dom": "17.0.2",
-		"react-icons": "^4.2.0"
+		"react-icons": "^4.2.0",
+		"twilio": "^3.64.0",
+		"twilio-video": "^2.15.1"
 	},
 	"devDependencies": {
 		"autoprefixer": "^10.2.6",
