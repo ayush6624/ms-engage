@@ -3,7 +3,6 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { BASE_URL } from '../lib/url';
 import { FcGoogle } from 'react-icons/fc';
 import { LogIn, User, Lock, AlertCircle } from '@geist-ui/react-icons';
-// import { GoogleLogin } from 'react-google-login';
 import { signin, useSession } from 'next-auth/client';
 import { useRouter } from 'next/router';
 

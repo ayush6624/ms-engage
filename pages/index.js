@@ -7,7 +7,7 @@ import {
 	Col,
 	Card,
 	Tabs,
-	User
+	Button
 } from '@geist-ui/react';
 import { TwitchIcon, TwitterIcon } from '@geist-ui/react-icons';
 
@@ -37,7 +37,7 @@ export default function Home() {
 							</Text>
 						</Tabs.Item>
 					</Tabs>
-					<Text h3>Start a meeting</Text>
+					<Button>Start a meeting</Button>
 				</Card>
 			</Row>
 		</>
