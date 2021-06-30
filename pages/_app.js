@@ -36,6 +36,10 @@ function MyApp({ Component, pageProps }) {
 			<MeetingProvider value={{ token, setToken, roomName, setRoomName }}>
 				<Provider session={pageProps.session}>
 					<Page>
+						{/* <Script
+							src="https://twilio.github.io/twilio-video-processors.js/examples/virtualbackground/twilio-video-processors.min.js"
+							strategy="beforeInteractive"
+						/> */}
 						<Page.Header>
 							<Header
 								themeType={themeType}

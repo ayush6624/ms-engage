@@ -1,9 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState, useEffect } from 'react';
-import Video from 'twilio-video';
+import Video, { createLocalTracks, LocalVideoTrack } from 'twilio-video';
+
 import Participant from './participant';
 import {
-	Row,
+	User,
 	Text,
 	Image,
 	Col,
@@ -16,7 +17,7 @@ import {
 	useToasts
 } from '@geist-ui/react';
 import Confetti from 'react-confetti';
-
+import { useRouter } from 'next/router';
 import {
 	Mic,
 	MicOff,
@@ -35,14 +36,15 @@ const Room = ({ roomName, token, handleLogout }) => {
 	const [room, setRoom] = useState(null);
 	const [participants, setParticipants] = useState([]); // ['x', 'y']
 	const [showConfetti, setShowConfetti] = useState(false);
-	const [mic, setMic] = useState(false);
-	const [camera, setCamera] = useState(false);
+	const [mic, setMic] = useState(true);
+	const [camera, setCamera] = useState(true);
 	const [shareModal, setShareModal] = useState(false);
 	const { copy } = useClipboard();
 	const [, setToast] = useToasts();
 
 	const theme = useTheme();
 
+	const { push } = useRouter();
 	useEffect(() => {
 		if (showConfetti) {
 			setTimeout(() => {
@@ -52,25 +54,59 @@ const Room = ({ roomName, token, handleLogout }) => {
 	}, [showConfetti]);
 
 	useEffect(() => {
-		const participantConnected = (participant) => {
-			setParticipants((prevParticipants) => [
-				...prevParticipants,
-				participant
-			]);
-		};
-		const participantDisconnected = (participant) => {
-			setParticipants((prevParticipants) =>
-				prevParticipants.filter((p) => p !== participant)
-			);
-		};
-		Video.connect(token, {
-			name: roomName
-		}).then((room) => {
-			setRoom(room);
-			room.on('participantConnected', participantConnected);
-			room.on('participantDisconnected', participantDisconnected);
-			room.participants.forEach(participantConnected);
-		});
+		async function helper() {
+			// const VideoProcessors = await import('@twilio/video-processors');
+
+			// const setProcessor = (processor, track) => {
+			// 	if (track.processor) {
+			// 		track.removeProcessor(track.processor);
+			// 	}
+			// 	if (processor) {
+			// 		track.addProcessor(processor);
+			// 	}
+			// };
+
+			const participantConnected = (participant) => {
+				setParticipants((prevParticipants) => [
+					...prevParticipants,
+					participant
+				]);
+			};
+			const participantDisconnected = (participant) => {
+				setParticipants((prevParticipants) =>
+					prevParticipants.filter((p) => p !== participant)
+				);
+			};
+			// const tracks = await createLocalTracks({
+			// 	audio: true,
+			// 	video: { facingMode: 'user' }
+			// });
+
+			Video.connect(token, {
+				name: roomName
+				// tracks
+			}).then((room) => {
+				setRoom(room);
+				room.on('participantConnected', participantConnected);
+				room.on('participantDisconnected', participantDisconnected);
+				room.participants.forEach(participantConnected);
+			});
+
+			// const {
+			// 	GaussianBlurBackgroundProcessor,
+			// 	VirtualBackgroundProcessor,
+			// 	isSupported
+			// } = VideoProcessors;
+
+			// const gaussianBlurProcessor = new GaussianBlurBackgroundProcessor({
+			// 	assetsPath: '',
+			// 	maskBlurRadius: 1,
+			// 	blurFilterRadius: 1
+			// });
+			// await gaussianBlurProcessor.loadModel();
+			// setProcessor(gaussianBlurProcessor, videoTrack);
+		}
+		helper();
 
 		return () => {
 			setRoom((currentRoom) => {
@@ -134,6 +170,16 @@ const Room = ({ roomName, token, handleLogout }) => {
 						<Input placeholder="Email ID" type="email"></Input>
 						<Input type="submit" icon={<Share />} />
 					</form>
+					<div className="mt-3">
+						{participants.map((d, i) => (
+							<div key={i} className="my-1">
+								<User
+									src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/2048px-Google_%22G%22_Logo.svg.png"
+									name={d.identity}
+								/>
+							</div>
+						))}
+					</div>
 				</Modal.Content>
 				<Modal.Action passive onClick={() => setShareModal(false)}>
 					Done
@@ -159,7 +205,6 @@ const Room = ({ roomName, token, handleLogout }) => {
 											: publication.track.enable();
 									}
 								);
-								console.log('mic');
 								setMic(!mic);
 							}}
 						>
@@ -175,7 +220,16 @@ const Room = ({ roomName, token, handleLogout }) => {
 							} rounded-full shadow-xl transition ease-in-out duration-300 ${
 								!camera && 'bg-red-500'
 							}`}
-							onClick={() => setCamera(!camera)}
+							onClick={() => {
+								room.localParticipant.videoTracks.forEach(
+									(publication) => {
+										camera
+											? publication.track.disable()
+											: publication.track.enable();
+									}
+								);
+								setCamera(!camera);
+							}}
 						>
 							{camera ? <Camera /> : <CameraOff />}
 						</button>
@@ -191,7 +245,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 							}`}
 							onClick={() => setShowConfetti(true)}
 						>
-							<GiPartyPopper size="28px" />
+							<GiPartyPopper size="25px" />
 						</button>
 					</li>
 					<li>
@@ -201,12 +255,28 @@ const Room = ({ roomName, token, handleLogout }) => {
 									? 'bg-gray-450'
 									: 'bg-white'
 							} rounded-full shadow-xl`}
+							onClick={async () => {
+								const stream =
+									await navigator.mediaDevices.getDisplayMedia();
+								const screenTrack = new LocalVideoTrack(
+									stream.getTracks()[0]
+								);
+								room.localParticipant.publishTrack(screenTrack);
+							}}
 						>
 							<Airplay />
 						</button>
 					</li>
 					<li>
-						<button className="p-4 w-24 rounded-full shadow-xl bg-red-600">
+						<button
+							className="p-4 w-24 rounded-full shadow-xl bg-red-600"
+							onClick={() => {
+								console.log('disconnect');
+								// window.location.href = '/';
+								push('/');
+								room.disconnect();
+							}}
+						>
 							<img
 								src="https://img.icons8.com/material-outlined/24/000000/end-call.png"
 								className="mx-auto"
@@ -223,12 +293,12 @@ const Room = ({ roomName, token, handleLogout }) => {
 							} rounded-full shadow-xl`}
 							onClick={() => setShareModal(true)}
 						>
-							<Share />
+							<Users />
 						</button>
 					</li>
 				</ul>
 			</aside>
-			<div className="grid grid-cols-2  grid-flow-cols gap-3">
+			<div className="grid grid-cols-2 grid-flow-cols gap-3">
 				{room && (
 					<Participant
 						isHost={true}

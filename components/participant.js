@@ -70,7 +70,7 @@ const Participant = ({ participant, isHost = false }) => {
 	return (
 		<div className="relative border border-green-400 rounded-xl">
 			<p className="absolute bottom-0 mb-3 ml-5 shadow-xl text-white">
-				{'participant.identity'}
+				{participant.identity}
 			</p>
 			<video
 				// src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
