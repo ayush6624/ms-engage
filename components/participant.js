@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './participant.module.css';
 
-const Participant = ({ participant }) => {
+const Participant = ({ participant, isHost = false }) => {
 	const [videoTracks, setVideoTracks] = useState([]);
 	const [audioTracks, setAudioTracks] = useState([]);
 
@@ -68,10 +68,19 @@ const Participant = ({ participant }) => {
 	}, [audioTracks]);
 
 	return (
-		<div className="nes-container with-title is-rounded">
-			<p className="title">{participant.identity}</p>
-			<video className={styles.video} ref={videoRef} autoPlay={true} />
-			<audio ref={audioRef} autoPlay={true} muted={true} />
+		<div className="relative border border-green-400 rounded-xl">
+			<p className="absolute bottom-0 mb-3 ml-5 shadow-xl text-white">
+				{'participant.identity'}
+			</p>
+			<video
+				// src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+				className={styles.video}
+				ref={videoRef}
+				autoPlay={true}
+				width="350px"
+				height="350px"
+			/>
+			<audio ref={audioRef} autoPlay={true} muted={false} />
 		</div>
 	);
 };
