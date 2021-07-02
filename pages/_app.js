@@ -30,11 +30,21 @@ function MyApp({ Component, pageProps }) {
 
 	const [token, setToken] = useState('');
 	const [roomName, setRoomName] = useState('');
+	const [userBackground, setUserBackground] = useState('');
 
 	return (
 		<GeistProvider themeType={themeType}>
 			<CssBaseline />
-			<MeetingProvider value={{ token, setToken, roomName, setRoomName }}>
+			<MeetingProvider
+				value={{
+					token,
+					setToken,
+					roomName,
+					setRoomName,
+					setUserBackground,
+					userBackground
+				}}
+			>
 				<Provider session={pageProps.session}>
 					<Page>
 						{/* <Script

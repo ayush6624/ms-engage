@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import styles from './participant.module.css';
+import { MeetingContext } from '../lib/context/token';
 
 const Participant = ({ participant, isHost = false }) => {
 	const [videoTracks, setVideoTracks] = useState([]);
 	const [audioTracks, setAudioTracks] = useState([]);
+	const { userBackground } = useContext(MeetingContext);
 
 	const videoRef = useRef();
 	const audioRef = useRef();
@@ -67,6 +69,77 @@ const Participant = ({ participant, isHost = false }) => {
 			};
 		}
 	}, [audioTracks]);
+
+	const [virtualBackground, setVirtualBackground] = useState();
+	const [blurBackground, setBlurBackground] = useState();
+
+	useEffect(() => {
+		const blurBackgroundHelper = async () => {
+			const { GaussianBlurBackgroundProcessor } = await import(
+				'@twilio/video-processors'
+			);
+			const blurBg = new GaussianBlurBackgroundProcessor({
+				assetsPath: ''
+			});
+			setBlurBackground(blurBg);
+		};
+
+		const virtualBackgroundHelper = async () => {
+			const { VirtualBackgroundProcessor } = await import(
+				'@twilio/video-processors'
+			);
+
+			const img = new Image();
+			img.src = '/twilio-video-processor/vacation.jpg';
+			img.onload = () => {
+				const virtualBg = new VirtualBackgroundProcessor({
+					assetsPath: '',
+					backgroundImage: img
+				});
+				setVirtualBackground(virtualBg);
+			};
+		};
+
+		virtualBackgroundHelper();
+		blurBackgroundHelper();
+	}, []);
+
+	useEffect(() => {
+		if (virtualBackground && blurBackground) {
+			toggleBackground(userBackground);
+		}
+	}, [userBackground, virtualBackground, blurBackground]);
+
+	const setProcessor = (processor, track) => {
+		removeProcessor(track);
+		if (processor) {
+			track?.addProcessor(processor);
+		}
+	};
+
+	const removeProcessor = (track) => {
+		if (track?.processor) {
+			track?.removeProcessor(track.processor);
+		}
+	};
+
+	function toggleBackground(bgType) {
+		if (!isHost) return;
+		if (!videoTracks[0]) return;
+		console.log('bgType -> ', bgType);
+		const videoTrack = videoTracks[0];
+		if (bgType === null || bgType === '') {
+			removeProcessor(videoTrack);
+			return;
+		}
+
+		const backgroundProcessor =
+			bgType === 'blur' ? blurBackground : virtualBackground;
+
+		backgroundProcessor
+			.loadModel()
+			.then(() => setProcessor(backgroundProcessor, videoTrack));
+	}
 
 	return (
 		<div className="relative border border-green-400 rounded-xl">

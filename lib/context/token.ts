@@ -5,9 +5,12 @@ export const MeetingContext = createContext<{
 	setToken?: Dispatch<SetStateAction<number>>;
 	roomName: string;
 	setRoomName?: Dispatch<SetStateAction<number>>;
+	userBackground?: string;
+	setUserBackground?: Dispatch<SetStateAction<string>>;
 }>({
 	token: '',
-	roomName: ''
+	roomName: '',
+	userBackground: ''
 });
 
 export const MeetingProvider = MeetingContext.Provider;

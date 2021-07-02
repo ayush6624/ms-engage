@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/client';
 
 const Meet = (props) => {
-	const { query, push, replace } = useRouter();
+	const { query, push } = useRouter();
 	const [session, loading] = useSession();
 	const { token, setToken } = useContext(MeetingContext);
 

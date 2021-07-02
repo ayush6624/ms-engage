@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Video, { createLocalTracks, LocalVideoTrack } from 'twilio-video';
 
 import Participant from './participant';
@@ -34,6 +34,7 @@ import {
 import { GiPartyPopper } from 'react-icons/gi';
 import { FaChalkboardTeacher } from 'react-icons/fa';
 import Whiteboard from './whiteboard';
+import { MeetingContext } from '../lib/context/token';
 
 const Room = ({ roomName, token, handleLogout }) => {
 	const [room, setRoom] = useState(null);
@@ -42,9 +43,11 @@ const Room = ({ roomName, token, handleLogout }) => {
 	const [mic, setMic] = useState(true);
 	const [camera, setCamera] = useState(true);
 	const [shareModal, setShareModal] = useState(false);
+	const [shareScreen, setShareScreen] = useState(false);
 	const [showWhiteboard, setShowWhiteboard] = useState(false);
 	const { copy } = useClipboard();
 	const [, setToast] = useToasts();
+	const { userBackground, setUserBackground } = useContext(MeetingContext);
 
 	const theme = useTheme();
 
@@ -59,17 +62,6 @@ const Room = ({ roomName, token, handleLogout }) => {
 
 	useEffect(() => {
 		async function helper() {
-			// const VideoProcessors = await import('@twilio/video-processors');
-
-			// const setProcessor = (processor, track) => {
-			// 	if (track.processor) {
-			// 		track.removeProcessor(track.processor);
-			// 	}
-			// 	if (processor) {
-			// 		track.addProcessor(processor);
-			// 	}
-			// };
-
 			const participantConnected = (participant) => {
 				setParticipants((prevParticipants) => [
 					...prevParticipants,
@@ -81,11 +73,6 @@ const Room = ({ roomName, token, handleLogout }) => {
 					prevParticipants.filter((p) => p !== participant)
 				);
 			};
-			// const tracks = await createLocalTracks({
-			// 	audio: true,
-			// 	video: { facingMode: 'user' }
-			// });
-
 			Video.connect(token, {
 				name: roomName
 				// tracks
@@ -95,20 +82,6 @@ const Room = ({ roomName, token, handleLogout }) => {
 				room.on('participantDisconnected', participantDisconnected);
 				room.participants.forEach(participantConnected);
 			});
-
-			// const {
-			// 	GaussianBlurBackgroundProcessor,
-			// 	VirtualBackgroundProcessor,
-			// 	isSupported
-			// } = VideoProcessors;
-
-			// const gaussianBlurProcessor = new GaussianBlurBackgroundProcessor({
-			// 	assetsPath: '',
-			// 	maskBlurRadius: 1,
-			// 	blurFilterRadius: 1
-			// });
-			// await gaussianBlurProcessor.loadModel();
-			// setProcessor(gaussianBlurProcessor, videoTrack);
 		}
 		helper();
 
@@ -147,6 +120,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 						<Button
 							size="small"
 							auto
+							icon={<Clipboard />}
 							onClick={() => {
 								copy(
 									`https://teams.ayushgoyal.dev/${roomName}`
@@ -253,6 +227,27 @@ const Room = ({ roomName, token, handleLogout }) => {
 									? 'bg-gray-450'
 									: 'bg-white'
 							} rounded-full shadow-xl transition ease-in-out duration-300  ${
+								userBackground && 'bg-red-500'
+							}`}
+							onClick={() => {
+								if (userBackground) setUserBackground('');
+								else setUserBackground('virtual');
+							}}
+						>
+							<img
+								src="/background.svg"
+								className="stroke-current text-black"
+								alt="change background"
+							/>
+						</button>
+					</li>
+					<li>
+						<button
+							className={`p-4 ${
+								theme.type === 'dark'
+									? 'bg-gray-450'
+									: 'bg-white'
+							} rounded-full shadow-xl transition ease-in-out duration-300  ${
 								showConfetti && 'bg-red-500'
 							}`}
 							onClick={() => setShowConfetti(true)}
@@ -274,6 +269,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 									stream.getTracks()[0]
 								);
 								room.localParticipant.publishTrack(screenTrack);
+								setShareScreen(!shareScreen);
 							}}
 						>
 							<Airplay />
@@ -286,7 +282,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 									? 'bg-gray-450'
 									: 'bg-white'
 							} rounded-full shadow-xl transition ease-in-out duration-300  ${
-								showConfetti && 'bg-red-500'
+								showWhiteboard && 'bg-red-500'
 							}`}
 							onClick={() => setShowWhiteboard(true)}
 						>
