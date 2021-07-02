@@ -914,6 +914,11 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@excalidraw/excalidraw-next@^0.8.0-2d279cb":
+  version "0.8.0-2d279cb"
+  resolved "https://registry.yarnpkg.com/@excalidraw/excalidraw-next/-/excalidraw-next-0.8.0-2d279cb.tgz#2b9795ab0ac5cbf839a8cb6e006f5103033d75f5"
+  integrity sha512-w6syyZyu6wJLsv6P8GplCKH5mdwmBj1FoQC0XAPo7s1wBS65cLZL5E32bXFyQk8ag+NjP+z3R6eVvYzcsULdYQ==
+
 "@fullhuman/postcss-purgecss@^4.0.3":
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/@fullhuman/postcss-purgecss/-/postcss-purgecss-4.0.3.tgz#55d71712ec1c7a88e0d1ba5f10ce7fb6aa05beb4"

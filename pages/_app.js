@@ -1,5 +1,6 @@
 import '../styles/globals.css';
 import 'tailwindcss/tailwind.css';
+import '../components/whiteboard.css';
 
 import { GeistProvider, CssBaseline, Page } from '@geist-ui/react';
 import { useState, useEffect } from 'react';

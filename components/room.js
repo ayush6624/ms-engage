@@ -14,7 +14,8 @@ import {
 	Input,
 	Modal,
 	useClipboard,
-	useToasts
+	useToasts,
+	Page
 } from '@geist-ui/react';
 import Confetti from 'react-confetti';
 import { useRouter } from 'next/router';
@@ -31,6 +32,8 @@ import {
 	ThumbsUp
 } from '@geist-ui/react-icons';
 import { GiPartyPopper } from 'react-icons/gi';
+import { FaChalkboardTeacher } from 'react-icons/fa';
+import Whiteboard from './whiteboard';
 
 const Room = ({ roomName, token, handleLogout }) => {
 	const [room, setRoom] = useState(null);
@@ -39,6 +42,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 	const [mic, setMic] = useState(true);
 	const [camera, setCamera] = useState(true);
 	const [shareModal, setShareModal] = useState(false);
+	const [showWhiteboard, setShowWhiteboard] = useState(false);
 	const { copy } = useClipboard();
 	const [, setToast] = useToasts();
 
@@ -164,6 +168,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 								text: 'Invitation Sent Successfully',
 								type: 'success'
 							});
+							setShareModal(false);
 						}}
 						className="mt-3 flex flex-row justify-around items-center"
 					>
@@ -184,6 +189,13 @@ const Room = ({ roomName, token, handleLogout }) => {
 				<Modal.Action passive onClick={() => setShareModal(false)}>
 					Done
 				</Modal.Action>
+			</Modal>
+			<Modal
+				open={showWhiteboard}
+				width="70vw"
+				onClose={() => setShowWhiteboard(false)}
+			>
+				<Whiteboard />
 			</Modal>
 			{showConfetti && <Confetti width={'1000px'} height={'800px'} />}
 			<aside className="absolute bottom-0 w-full z-20 items-center text-gray-700 shadow-xl rounded-xl flex justify-center">
@@ -269,6 +281,20 @@ const Room = ({ roomName, token, handleLogout }) => {
 					</li>
 					<li>
 						<button
+							className={`p-4 ${
+								theme.type === 'dark'
+									? 'bg-gray-450'
+									: 'bg-white'
+							} rounded-full shadow-xl transition ease-in-out duration-300  ${
+								showConfetti && 'bg-red-500'
+							}`}
+							onClick={() => setShowWhiteboard(true)}
+						>
+							<FaChalkboardTeacher size="25px" />
+						</button>
+					</li>
+					<li>
+						<button
 							className="p-4 w-24 rounded-full shadow-xl bg-red-600"
 							onClick={() => {
 								console.log('disconnect');
@@ -284,6 +310,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 							/>
 						</button>
 					</li>
+
 					<li>
 						<button
 							className={`p-4 ${
