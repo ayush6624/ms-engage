@@ -1,21 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState, useEffect, useContext } from 'react';
 import Video, { createLocalTracks, LocalVideoTrack } from 'twilio-video';
-
+import ScreenShare from './screenshare';
 import Participant from './participant';
 import {
 	User,
 	Text,
 	Image,
-	Col,
 	Code,
 	Button,
 	useTheme,
 	Input,
 	Modal,
 	useClipboard,
-	useToasts,
-	Page
+	useToasts
 } from '@geist-ui/react';
 import Confetti from 'react-confetti';
 import { useRouter } from 'next/router';
@@ -44,12 +42,38 @@ const Room = ({ roomName, token, handleLogout }) => {
 	const [camera, setCamera] = useState(true);
 	const [shareModal, setShareModal] = useState(false);
 	const [shareScreen, setShareScreen] = useState(false);
+	const [screenTrack, setScreenTrack] = useState(null);
 	const [showWhiteboard, setShowWhiteboard] = useState(false);
 	const { copy } = useClipboard();
 	const [, setToast] = useToasts();
 	const { userBackground, setUserBackground } = useContext(MeetingContext);
-
 	const theme = useTheme();
+
+	const shareScreenHandler = async () => {
+		if (!screenTrack) {
+			navigator.mediaDevices
+				.getDisplayMedia()
+				.then((stream) => {
+					const temp = new LocalVideoTrack(stream.getTracks()[0]);
+					setScreenTrack(temp);
+					room.localParticipant.publishTrack(temp);
+					temp.mediaStreamTrack.onended = () => {
+						shareScreenHandler();
+					};
+					console.log('screenTrack');
+					setShareScreen(true);
+					console.log('room -> ', room.localParticipant.videoTracks);
+				})
+				.catch((e) => {
+					console.log('err -> ', e);
+					alert('Could not share the screen.', e);
+				});
+		} else {
+			room.localParticipant.unpublishTrack(screenTrack);
+			screenTrack.stop();
+			setScreenTrack(null);
+		}
+	};
 
 	const { push } = useRouter();
 	useEffect(() => {
@@ -263,12 +287,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 									: 'bg-white'
 							} rounded-full shadow-xl`}
 							onClick={async () => {
-								const stream =
-									await navigator.mediaDevices.getDisplayMedia();
-								const screenTrack = new LocalVideoTrack(
-									stream.getTracks()[0]
-								);
-								room.localParticipant.publishTrack(screenTrack);
+								shareScreenHandler();
 								setShareScreen(!shareScreen);
 							}}
 						>
@@ -329,6 +348,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 						participant={room.localParticipant}
 					/>
 				)}
+				{screenTrack && <ScreenShare screenTrack={screenTrack} />}
 				{remoteParticipants}
 			</div>
 		</div>

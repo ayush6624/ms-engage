@@ -38,6 +38,7 @@ const Participant = ({ participant, isHost = false }) => {
 
 		setVideoTracks(trackPubsToTracks(participant.videoTracks));
 		setAudioTracks(trackPubsToTracks(participant.audioTracks));
+		console.log('-> ', participant.videoTracks);
 
 		participant.on('trackSubscribed', trackSubscribed);
 		participant.on('trackUnsubscribed', trackUnsubscribed);
@@ -51,7 +52,6 @@ const Participant = ({ participant, isHost = false }) => {
 
 	useEffect(() => {
 		const videoTrack = videoTracks[0];
-		console.log('-->', videoTracks);
 		if (videoTrack) {
 			videoTrack.attach(videoRef.current);
 			return () => {
