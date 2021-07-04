@@ -1,16 +1,15 @@
 import {
-	Row,
-	Spacer,
-	Text,
 	Image,
 	Grid,
 	ButtonDropdown,
 	User,
 	Button
 } from '@geist-ui/react';
-import { useSession, signOut } from 'next-auth/client';
+import { useSession, signOut, signin } from 'next-auth/client';
+import { BASE_URL } from '../lib/url';
 import { useRouter } from 'next/router';
 import { Moon, Sun } from '@geist-ui/react-icons';
+import { FcGoogle } from 'react-icons/fc';
 
 export function Header({ themeType, switchTheme }) {
 	const [session, loading] = useSession();
@@ -30,8 +29,16 @@ export function Header({ themeType, switchTheme }) {
 			</Grid>
 			<Grid span={5} className="">
 				{!session ? (
-					<Button loading={loading} onClick={() => push('/login')}>
-						Login
+					<Button
+						loading={loading}
+						icon={<FcGoogle width="28px" height="28px" />}
+						onClick={() => {
+							signin('google', {
+								callbackUrl: `${BASE_URL}`
+							});
+						}}
+					>
+						<span className="ml-5">Sign In With Google</span>
 					</Button>
 				) : (
 					<ButtonDropdown size="medium">

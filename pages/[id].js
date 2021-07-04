@@ -11,7 +11,7 @@ const Meet = (props) => {
 
 	if (loading) return <div>Authenticating</div>;
 	if (session === null) {
-		push('/login');
+		push('/');
 		return <div>Please login first!</div>;
 	}
 	if (token === '') {
