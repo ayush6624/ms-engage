@@ -20,7 +20,7 @@ export function Header({ themeType, switchTheme }) {
 			<Grid>
 				<button onClick={() => push('/')}>
 					<Image
-						src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1200px-Microsoft_logo.svg.png"
+						src="/logo.png"
 						width="40"
 						height="40"
 						alt="logo"

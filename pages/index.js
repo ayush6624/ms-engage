@@ -11,10 +11,11 @@ import {
 	Divider,
 	useToasts
 } from '@geist-ui/react';
+import { XCircleFill } from '@geist-ui/react-icons';
 import { PlusCircle } from '@geist-ui/react-icons';
 import { useSession } from 'next-auth/client';
 import { useRouter } from 'next/router';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FaRegKeyboard } from 'react-icons/fa';
 import { MeetingContext } from '../lib/context/token';
 
@@ -24,6 +25,7 @@ export default function Home() {
 	const [_toasts, setToast] = useToasts();
 	const { setToken } = useContext(MeetingContext);
 	const [joinRoom, setJoinRoom] = useState('');
+	const [prevMeeting, setPrevMeeting] = useState();
 
 	const handleSubmit = async (username, roomName) => {
 		const data = await fetch('/api/room', {
@@ -39,6 +41,11 @@ export default function Home() {
 		setToken(data.token);
 		push(`/${data.room}`);
 	};
+
+	useEffect(() => {
+		let prevMeeingId = window.localStorage.getItem('prevMeeting');
+		if (prevMeeingId) setPrevMeeting(prevMeeingId);
+	}, []);
 
 	return (
 		<>
@@ -70,7 +77,7 @@ export default function Home() {
 									});
 							}}
 						>
-							New meeting
+							New Meeting
 						</Button>
 						<Divider y={4} />
 						<form
@@ -79,7 +86,6 @@ export default function Home() {
 								e.preventDefault();
 								console.log(e.roomname);
 								if (session) {
-									console.log('joinRoom -> ', joinRoom);
 									setToast({
 										text: 'Meeting Joined Successfully',
 										type: 'success'
@@ -110,11 +116,38 @@ export default function Home() {
 								Join
 							</Button>
 						</form>
+						{prevMeeting && (
+							<>
+								<Divider y={2} />
+								<div className="inline-flex gap-2">
+									<Button
+										type="secondary-light"
+										shadow
+										onClick={() => {
+											push(`/${prevMeeting}`);
+										}}
+										ghost
+									>
+										Rejoin Meeting
+									</Button>
+									<button
+										onClick={() => {
+											window.localStorage.removeItem(
+												'prevMeeting'
+											);
+											setPrevMeeting();
+										}}
+									>
+										<XCircleFill />
+									</button>
+								</div>
+							</>
+						)}
 					</Card>
 				</Grid>
 				<Grid md={12}>
 					<Image
-						src="https://images.idgesg.net/images/article/2020/04/video_conferencing_remote_work_online_meeting_by_rlt_images_gettyimages-1219032156_2400x1600_cw-100839430-large.jpg"
+						src="/homepageimg.jpg"
 						alt="Promotional Image"
 						width="500px"
 						height="300px"

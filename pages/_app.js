@@ -31,6 +31,7 @@ function MyApp({ Component, pageProps }) {
 	const [token, setToken] = useState('');
 	const [roomName, setRoomName] = useState('');
 	const [userBackground, setUserBackground] = useState('');
+	const [userBgLink, setUserBgLink] = useState('');
 
 	return (
 		<GeistProvider themeType={themeType}>
@@ -42,15 +43,13 @@ function MyApp({ Component, pageProps }) {
 					roomName,
 					setRoomName,
 					setUserBackground,
-					userBackground
+					userBackground,
+					userBgLink,
+					setUserBgLink
 				}}
 			>
 				<Provider session={pageProps.session}>
 					<Page>
-						{/* <Script
-							src="https://twilio.github.io/twilio-video-processors.js/examples/virtualbackground/twilio-video-processors.min.js"
-							strategy="beforeInteractive"
-						/> */}
 						<Page.Header>
 							<Header
 								themeType={themeType}

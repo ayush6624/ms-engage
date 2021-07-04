@@ -1,5 +1,4 @@
 import { createContext, Dispatch, SetStateAction } from 'react';
-
 export const MeetingContext = createContext<{
 	token: string;
 	setToken?: Dispatch<SetStateAction<number>>;
@@ -7,10 +6,13 @@ export const MeetingContext = createContext<{
 	setRoomName?: Dispatch<SetStateAction<number>>;
 	userBackground?: string;
 	setUserBackground?: Dispatch<SetStateAction<string>>;
+	userBgLink?: string;
+	setUserBgLink?: Dispatch<SetStateAction<string>>;
 }>({
 	token: '',
 	roomName: '',
-	userBackground: ''
+	userBackground: '',
+	userBgLink: ''
 });
 
 export const MeetingProvider = MeetingContext.Provider;

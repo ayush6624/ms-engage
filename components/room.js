@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState, useEffect, useContext } from 'react';
-import Video, { createLocalTracks, LocalVideoTrack } from 'twilio-video';
+import Video, { LocalVideoTrack } from 'twilio-video';
 import ScreenShare from './screenshare';
 import Participant from './participant';
 import { API_BASE_URL } from '../lib/config';
@@ -8,7 +8,6 @@ import {
 	User,
 	Code,
 	Button,
-	useTheme,
 	Input,
 	Modal,
 	useClipboard,
@@ -33,10 +32,12 @@ import { FaChalkboardTeacher } from 'react-icons/fa';
 import Whiteboard from './whiteboard';
 import { MeetingContext } from '../lib/context/token';
 import ControlButton, { ChangeBackground, EndCall } from './ControlButton';
+import VirtualBackgroundModal from './VirtualBackground';
 
-const Room = ({ roomName, token, handleLogout }) => {
+const Room = ({ roomName, token }) => {
 	const [room, setRoom] = useState(null);
 	const [inviteEmail, setInviteEmail] = useState();
+	const [showBgModal, setShowBgModal] = useState(false);
 	const [participants, setParticipants] = useState([]); // ['x', 'y']
 	const [showConfetti, setShowConfetti] = useState(false);
 	const [mic, setMic] = useState(true);
@@ -47,26 +48,33 @@ const Room = ({ roomName, token, handleLogout }) => {
 	const [showWhiteboard, setShowWhiteboard] = useState(false);
 	const { copy } = useClipboard();
 	const [, setToast] = useToasts();
-	const { userBackground, setUserBackground } = useContext(MeetingContext);
-	const theme = useTheme();
+	const { userBackground } = useContext(MeetingContext);
 	const { push } = useRouter();
 
 	const shareScreenHandler = async () => {
 		if (!screenTrack) {
-			navigator.mediaDevices.getDisplayMedia().then((stream) => {
-				const temp = new LocalVideoTrack(stream.getTracks()[0]);
-				setScreenTrack(temp);
-				room.localParticipant.publishTrack(temp);
-				temp.mediaStreamTrack.onended = () => {
-					shareScreenHandler();
-				};
-			});
+			navigator.mediaDevices
+				.getDisplayMedia()
+				.then((stream) => {
+					const temp = new LocalVideoTrack(stream.getTracks()[0]);
+					setScreenTrack(temp);
+					room.localParticipant.publishTrack(temp);
+					temp.mediaStreamTrack.onended = () => {
+						shareScreenHandler();
+					};
+				})
+				.catch((err) => setShareScreen(false));
 		} else {
 			room.localParticipant.unpublishTrack(screenTrack);
 			screenTrack.stop();
 			setScreenTrack(null);
 		}
 	};
+
+	useEffect(
+		() => window.localStorage.setItem('prevMeeting', roomName),
+		[roomName]
+	);
 
 	useEffect(() => {
 		if (showConfetti) {
@@ -213,6 +221,12 @@ const Room = ({ roomName, token, handleLogout }) => {
 			>
 				<Whiteboard />
 			</Modal>
+			{showBgModal && (
+				<VirtualBackgroundModal
+					showModal={showBgModal}
+					setShowModal={setShowBgModal}
+				/>
+			)}
 			{showConfetti && <Confetti width={'1000px'} height={'800px'} />}
 			<aside className="absolute bottom-0 w-full z-20 items-center text-gray-700 shadow-xl rounded-xl flex justify-center">
 				<ul className="flex flex-row space-x-5 flex-wrap">
@@ -257,9 +271,12 @@ const Room = ({ roomName, token, handleLogout }) => {
 							toolTipText={'Switch Background'}
 							state={userBackground !== ''}
 							onClick={() => {
-								userBackground
-									? setUserBackground('')
-									: setUserBackground('virtual');
+								// if (userBackground) {
+								// 	setUserBgLink('');
+								// 	setUserBackground('');
+								// 	return;
+								// }
+								setShowBgModal(!showBgModal);
 							}}
 							icon={<ChangeBackground />}
 						/>

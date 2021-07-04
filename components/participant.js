@@ -35,7 +35,7 @@ const Participant = ({
 	}
 	const [videoTracks, setVideoTracks] = useState([]);
 	const [audioTracks, setAudioTracks] = useState([]);
-	const { userBackground } = useContext(MeetingContext);
+	const { userBackground, userBgLink } = useContext(MeetingContext);
 
 	const videoRef = useRef();
 	const audioRef = useRef();
@@ -136,7 +136,8 @@ const Participant = ({
 			);
 
 			const img = new Image();
-			img.src = '/twilio-video-processor/vacation.jpg';
+			console.log('img element-------');
+			img.src = userBgLink ?? '/twilio-video-processor/vacation.jpg';
 			img.onload = () => {
 				const virtualBg = new VirtualBackgroundProcessor({
 					assetsPath: '',
@@ -148,7 +149,7 @@ const Participant = ({
 
 		virtualBackgroundHelper();
 		blurBackgroundHelper();
-	}, []);
+	}, [userBgLink]);
 
 	useEffect(() => {
 		if (virtualBackground && blurBackground) {
