@@ -6,8 +6,6 @@ import Participant from './participant';
 import { API_BASE_URL } from '../lib/config';
 import {
 	User,
-	Text,
-	Image,
 	Code,
 	Button,
 	useTheme,
@@ -34,6 +32,7 @@ import { GiPartyPopper } from 'react-icons/gi';
 import { FaChalkboardTeacher } from 'react-icons/fa';
 import Whiteboard from './whiteboard';
 import { MeetingContext } from '../lib/context/token';
+import ControlButton, { ChangeBackground, EndCall } from './ControlButton';
 
 const Room = ({ roomName, token, handleLogout }) => {
 	const [room, setRoom] = useState(null);
@@ -216,16 +215,11 @@ const Room = ({ roomName, token, handleLogout }) => {
 			</Modal>
 			{showConfetti && <Confetti width={'1000px'} height={'800px'} />}
 			<aside className="absolute bottom-0 w-full z-20 items-center text-gray-700 shadow-xl rounded-xl flex justify-center">
-				<ul className="flex flex-row space-x-5">
+				<ul className="flex flex-row space-x-5 flex-wrap">
 					<li>
-						<button
-							className={`p-4 ${
-								theme.type === 'dark'
-									? 'bg-gray-450'
-									: 'bg-white'
-							} rounded-full shadow-xl transition ease-in-out duration-300 ${
-								!mic && 'bg-red-500'
-							}`}
+						<ControlButton
+							toolTipText={'Toggle Mic'}
+							state={!mic}
 							onClick={() => {
 								room.localParticipant.audioTracks.forEach(
 									(publication) => {
@@ -236,19 +230,14 @@ const Room = ({ roomName, token, handleLogout }) => {
 								);
 								setMic(!mic);
 							}}
-						>
-							{mic ? <Mic /> : <MicOff />}
-						</button>
+							icon={<Mic />}
+							activeIcon={<MicOff />}
+						/>
 					</li>
 					<li>
-						<button
-							className={`p-4 ${
-								theme.type === 'dark'
-									? 'bg-gray-450'
-									: 'bg-white'
-							} rounded-full shadow-xl transition ease-in-out duration-300 ${
-								!camera && 'bg-red-500'
-							}`}
+						<ControlButton
+							toolTipText={'Toggle Camera'}
+							state={!camera}
 							onClick={() => {
 								room.localParticipant.videoTracks.forEach(
 									(publication) => {
@@ -259,105 +248,59 @@ const Room = ({ roomName, token, handleLogout }) => {
 								);
 								setCamera(!camera);
 							}}
-						>
-							{camera ? <Camera /> : <CameraOff />}
-						</button>
+							icon={<Camera />}
+							activeIcon={<CameraOff />}
+						/>
 					</li>
 					<li>
-						<button
-							className={`p-4 ${
-								theme.type === 'dark'
-									? 'bg-gray-450'
-									: 'bg-white'
-							} rounded-full shadow-xl transition ease-in-out duration-300  ${
-								userBackground && 'bg-red-500'
-							}`}
+						<ControlButton
+							toolTipText={'Switch Background'}
+							state={userBackground !== ''}
 							onClick={() => {
-								if (userBackground) setUserBackground('');
-								else setUserBackground('virtual');
+								userBackground
+									? setUserBackground('')
+									: setUserBackground('virtual');
 							}}
-						>
-							<img
-								src="/background.svg"
-								className="stroke-current text-black"
-								width="28px"
-								height="28px"
-								alt="change background"
-							/>
-						</button>
+							icon={<ChangeBackground />}
+						/>
 					</li>
 					<li>
-						<button
-							className={`p-4 ${
-								theme.type === 'dark'
-									? 'bg-gray-450'
-									: 'bg-white'
-							} rounded-full shadow-xl transition ease-in-out duration-300  ${
-								showConfetti && 'bg-red-500'
-							}`}
+						<ControlButton
+							toolTipText={'Celebrate 🎉'}
+							state={showConfetti}
 							onClick={() => setShowConfetti(true)}
-						>
-							<GiPartyPopper size="25px" />
-						</button>
+							icon={<GiPartyPopper size="25px" />}
+						/>
 					</li>
-					<li>
-						<button
-							className={`p-4 ${
-								theme.type === 'dark'
-									? 'bg-gray-450'
-									: 'bg-white'
-							} rounded-full shadow-xl`}
+					<li className="hidden md:block">
+						<ControlButton
+							toolTipText={'Share your screen'}
+							state={shareScreen}
 							onClick={async () => {
 								shareScreenHandler();
 								setShareScreen(!shareScreen);
 							}}
-						>
-							<Airplay />
-						</button>
+							icon={<Airplay />}
+						/>
 					</li>
-					<li>
-						<button
-							className={`p-4 ${
-								theme.type === 'dark'
-									? 'bg-gray-450'
-									: 'bg-white'
-							} rounded-full shadow-xl transition ease-in-out duration-300  ${
-								showWhiteboard && 'bg-red-500'
-							}`}
+					<li className="hidden md:block">
+						<ControlButton
+							toolTipText={'WhiteBoard'}
+							state={showWhiteboard}
 							onClick={() => setShowWhiteboard(true)}
-						>
-							<FaChalkboardTeacher size="25px" />
-						</button>
+							icon={<FaChalkboardTeacher size="25px" />}
+						/>
 					</li>
 					<li>
-						<button
-							className="p-4 w-24 rounded-full shadow-xl bg-red-600"
-							onClick={() => {
-								console.log('disconnect');
-								// window.location.href = '/';
-								push('/');
-								room.disconnect();
-							}}
-						>
-							<img
-								src="https://img.icons8.com/material-outlined/24/000000/end-call.png"
-								className="mx-auto"
-								alt="End Call"
-							/>
-						</button>
+						<EndCall room={room} push={push} />
 					</li>
-
 					<li>
-						<button
-							className={`p-4 ${
-								theme.type === 'dark'
-									? 'bg-gray-450'
-									: 'bg-white'
-							} rounded-full shadow-xl`}
+						<ControlButton
+							toolTipText={'Show Members & Invite Friends'}
+							state={shareModal}
 							onClick={() => setShareModal(true)}
-						>
-							<Users />
-						</button>
+							icon={<Users />}
+						/>
 					</li>
 				</ul>
 			</aside>
