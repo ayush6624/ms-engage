@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef, useContext } from 'react';
 import styles from './participant.module.css';
 import { MeetingContext } from '../lib/context/token';
+import { API_BASE_URL } from '../lib/config';
 
-const Participant = ({ participant, isHost = false, setScreenTrack }) => {
-	function printNetworkQualityStats(
-		networkQualityLevel,
-		networkQualityStats
-	) {
-		// Print in console the networkQualityLevel using bars
+const Participant = ({
+	meetingId,
+	participant,
+	isHost = false,
+	setScreenTrack
+}) => {
+	function printNetworkQualityStats(networkQualityLevel, networkStats) {
 		console.log(
 			{
 				1: '▃',
@@ -17,9 +19,18 @@ const Participant = ({ participant, isHost = false, setScreenTrack }) => {
 				5: '▃▄▅▆▇'
 			}[networkQualityLevel] || ''
 		);
-
-		if (networkQualityStats) {
-			console.log('Network Quality statistics:', networkQualityStats);
+		if (networkStats) {
+			fetch(`${API_BASE_URL}/health`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					meetingId,
+					audioRecv: networkStats.audio.recv,
+					audioSend: networkStats.audio.send,
+					videoRecv: networkStats.video.recv,
+					videoSend: networkStats.video.send
+				})
+			});
 		}
 	}
 	const [videoTracks, setVideoTracks] = useState([]);
@@ -57,12 +68,9 @@ const Participant = ({ participant, isHost = false, setScreenTrack }) => {
 
 		setVideoTracks(trackPubsToTracks(participant.videoTracks));
 		setAudioTracks(trackPubsToTracks(participant.audioTracks));
-		console.log('-> ', participant.videoTracks);
-
 		participant.on('trackSubscribed', trackSubscribed);
 		participant.on('trackUnsubscribed', trackUnsubscribed);
 		participant.on('trackPublished', async (remoteTrackPublication) => {
-			console.log('trackPublished event')
 			while (true) {
 				if (remoteTrackPublication.track) break;
 				await new Promise((res) => {
@@ -73,13 +81,12 @@ const Participant = ({ participant, isHost = false, setScreenTrack }) => {
 		});
 
 		participant.on('trackUnpublished', (remoteTrackPublication) => {
-			console.log('trackUnpublished event')
 			setScreenTrack(null);
 		});
 		participant.on('networkQualityLevelChanged', printNetworkQualityStats);
 		printNetworkQualityStats(
 			participant.networkQualityLevel,
-			participant.networkQualityStats
+			participant.networkStats
 		);
 
 		return () => {
@@ -165,7 +172,6 @@ const Participant = ({ participant, isHost = false, setScreenTrack }) => {
 	function toggleBackground(bgType) {
 		if (!isHost) return;
 		if (!videoTracks[0]) return;
-		console.log('bgType -> ', bgType);
 		const videoTrack = videoTracks[0];
 		if (bgType === null || bgType === '') {
 			removeProcessor(videoTrack);

@@ -3,6 +3,7 @@ import { useState, useEffect, useContext } from 'react';
 import Video, { createLocalTracks, LocalVideoTrack } from 'twilio-video';
 import ScreenShare from './screenshare';
 import Participant from './participant';
+import { API_BASE_URL } from '../lib/config';
 import {
 	User,
 	Text,
@@ -36,6 +37,7 @@ import { MeetingContext } from '../lib/context/token';
 
 const Room = ({ roomName, token, handleLogout }) => {
 	const [room, setRoom] = useState(null);
+	const [inviteEmail, setInviteEmail] = useState();
 	const [participants, setParticipants] = useState([]); // ['x', 'y']
 	const [showConfetti, setShowConfetti] = useState(false);
 	const [mic, setMic] = useState(true);
@@ -52,22 +54,14 @@ const Room = ({ roomName, token, handleLogout }) => {
 
 	const shareScreenHandler = async () => {
 		if (!screenTrack) {
-			navigator.mediaDevices
-				.getDisplayMedia()
-				.then((stream) => {
-					const temp = new LocalVideoTrack(stream.getTracks()[0]);
-					setScreenTrack(temp);
-					room.localParticipant.publishTrack(temp);
-					temp.mediaStreamTrack.onended = () => {
-						shareScreenHandler();
-					};
-					setScreenShare(true);
-				})
-
-				.catch((e) => {
-					console.log('err -> ', e);
-					alert('Could not share the screen.', e);
-				});
+			navigator.mediaDevices.getDisplayMedia().then((stream) => {
+				const temp = new LocalVideoTrack(stream.getTracks()[0]);
+				setScreenTrack(temp);
+				room.localParticipant.publishTrack(temp);
+				temp.mediaStreamTrack.onended = () => {
+					shareScreenHandler();
+				};
+			});
 		} else {
 			room.localParticipant.unpublishTrack(screenTrack);
 			screenTrack.stop();
@@ -138,6 +132,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 
 	const remoteParticipants = participants.map((participant) => (
 		<Participant
+			meetingId={roomName}
 			key={participant.sid}
 			participant={participant}
 			setScreenTrack={setScreenTrack}
@@ -171,17 +166,30 @@ const Room = ({ roomName, token, handleLogout }) => {
 					</div>
 
 					<form
-						onSubmit={(e) => {
+						onSubmit={async (e) => {
 							e.preventDefault();
+							await fetch(`${API_BASE_URL}/invite`, {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({
+									email: inviteEmail,
+									id: roomName
+								})
+							});
 							setToast({
 								text: 'Invitation Sent Successfully',
 								type: 'success'
 							});
+							setInviteEmail('');
 							setShareModal(false);
 						}}
 						className="mt-3 flex flex-row justify-around items-center"
 					>
-						<Input placeholder="Email ID" type="email"></Input>
+						<Input
+							placeholder="Email ID"
+							type="email"
+							onChange={(e) => setInviteEmail(e.target.value)}
+						></Input>
 						<Input type="submit" icon={<Share />} />
 					</form>
 					<div className="mt-3">
@@ -356,6 +364,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 			<div className="grid grid-cols-2 grid-flow-cols gap-3">
 				{room && (
 					<Participant
+						meetingId={roomName}
 						isHost={true}
 						key={room.localParticipant.sid}
 						participant={room.localParticipant}
