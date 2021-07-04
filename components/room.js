@@ -48,6 +48,7 @@ const Room = ({ roomName, token, handleLogout }) => {
 	const [, setToast] = useToasts();
 	const { userBackground, setUserBackground } = useContext(MeetingContext);
 	const theme = useTheme();
+	const { push } = useRouter();
 
 	const shareScreenHandler = async () => {
 		if (!screenTrack) {
@@ -60,10 +61,9 @@ const Room = ({ roomName, token, handleLogout }) => {
 					temp.mediaStreamTrack.onended = () => {
 						shareScreenHandler();
 					};
-					console.log('screenTrack');
-					setShareScreen(true);
-					console.log('room -> ', room.localParticipant.videoTracks);
+					setScreenShare(true);
 				})
+
 				.catch((e) => {
 					console.log('err -> ', e);
 					alert('Could not share the screen.', e);
@@ -75,7 +75,6 @@ const Room = ({ roomName, token, handleLogout }) => {
 		}
 	};
 
-	const { push } = useRouter();
 	useEffect(() => {
 		if (showConfetti) {
 			setTimeout(() => {
@@ -98,10 +97,18 @@ const Room = ({ roomName, token, handleLogout }) => {
 				);
 			};
 			Video.connect(token, {
-				name: roomName
+				name: roomName,
+				networkQuality: {
+					local: 1,
+					remote: 2
+				}
 				// tracks
 			}).then((room) => {
 				setRoom(room);
+				room.localParticipant.setNetworkQualityConfiguration({
+					local: 2,
+					remote: 1
+				});
 				room.on('participantConnected', participantConnected);
 				room.on('participantDisconnected', participantDisconnected);
 				room.participants.forEach(participantConnected);
@@ -130,7 +137,11 @@ const Room = ({ roomName, token, handleLogout }) => {
 	}, [roomName, token]);
 
 	const remoteParticipants = participants.map((participant) => (
-		<Participant key={participant.sid} participant={participant} />
+		<Participant
+			key={participant.sid}
+			participant={participant}
+			setScreenTrack={setScreenTrack}
+		/>
 	));
 
 	return (
@@ -261,6 +272,8 @@ const Room = ({ roomName, token, handleLogout }) => {
 							<img
 								src="/background.svg"
 								className="stroke-current text-black"
+								width="28px"
+								height="28px"
 								alt="change background"
 							/>
 						</button>

@@ -2,7 +2,26 @@ import { useState, useEffect, useRef, useContext } from 'react';
 import styles from './participant.module.css';
 import { MeetingContext } from '../lib/context/token';
 
-const Participant = ({ participant, isHost = false }) => {
+const Participant = ({ participant, isHost = false, setScreenTrack }) => {
+	function printNetworkQualityStats(
+		networkQualityLevel,
+		networkQualityStats
+	) {
+		// Print in console the networkQualityLevel using bars
+		console.log(
+			{
+				1: '▃',
+				2: '▃▄',
+				3: '▃▄▅',
+				4: '▃▄▅▆',
+				5: '▃▄▅▆▇'
+			}[networkQualityLevel] || ''
+		);
+
+		if (networkQualityStats) {
+			console.log('Network Quality statistics:', networkQualityStats);
+		}
+	}
 	const [videoTracks, setVideoTracks] = useState([]);
 	const [audioTracks, setAudioTracks] = useState([]);
 	const { userBackground } = useContext(MeetingContext);
@@ -42,6 +61,26 @@ const Participant = ({ participant, isHost = false }) => {
 
 		participant.on('trackSubscribed', trackSubscribed);
 		participant.on('trackUnsubscribed', trackUnsubscribed);
+		participant.on('trackPublished', async (remoteTrackPublication) => {
+			console.log('trackPublished event')
+			while (true) {
+				if (remoteTrackPublication.track) break;
+				await new Promise((res) => {
+					setTimeout(res, 1);
+				});
+			}
+			setScreenTrack(remoteTrackPublication.track);
+		});
+
+		participant.on('trackUnpublished', (remoteTrackPublication) => {
+			console.log('trackUnpublished event')
+			setScreenTrack(null);
+		});
+		participant.on('networkQualityLevelChanged', printNetworkQualityStats);
+		printNetworkQualityStats(
+			participant.networkQualityLevel,
+			participant.networkQualityStats
+		);
 
 		return () => {
 			setVideoTracks([]);
