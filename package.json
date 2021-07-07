@@ -19,6 +19,7 @@
 		"react-confetti": "^6.0.1",
 		"react-dom": "17.0.2",
 		"react-icons": "^4.2.0",
+		"socket.io-client": "^4.1.2",
 		"twilio": "^3.64.0",
 		"twilio-video": "^2.15.1",
 		"unique-names-generator": "^4.5.0"

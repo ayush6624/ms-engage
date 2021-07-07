@@ -1,13 +1,29 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { MeetingContext } from '../lib/context/token';
 import Room from '../components/room';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/client';
+import { useConnectionContext } from '../lib/context/ConnectionContext';
 
 const Meet = (props) => {
 	const { query, push } = useRouter();
 	const [session, loading] = useSession();
 	const { token, setToken } = useContext(MeetingContext);
+	const { socketConnected, joinRoom, setRoomId, receiveMessages, setUser } =
+		useConnectionContext();
+
+	useEffect(() => {
+		setRoomId(query.id);
+		setUser({ user: session?.user });
+	}, [query.id, setRoomId, session, setUser]);
+
+	useEffect(() => {
+		if (socketConnected.current) {
+			joinRoom();
+			receiveMessages();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [socketConnected.current]);
 
 	if (loading) return <div>Authenticating</div>;
 	if (session === null) {

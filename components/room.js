@@ -25,6 +25,7 @@ import {
 	Clipboard,
 	Headphones,
 	Users,
+	MessageSquare,
 	ThumbsUp
 } from '@geist-ui/react-icons';
 import { GiPartyPopper } from 'react-icons/gi';
@@ -33,6 +34,7 @@ import Whiteboard from './whiteboard';
 import { MeetingContext } from '../lib/context/token';
 import ControlButton, { ChangeBackground, EndCall } from './ControlButton';
 import VirtualBackgroundModal from './VirtualBackground';
+import ChatPanel from './chat';
 
 const Room = ({ roomName, token }) => {
 	const [room, setRoom] = useState(null);
@@ -46,6 +48,7 @@ const Room = ({ roomName, token }) => {
 	const [shareScreen, setShareScreen] = useState(false);
 	const [screenTrack, setScreenTrack] = useState(null);
 	const [showWhiteboard, setShowWhiteboard] = useState(false);
+	const [showChatPanel, setShowChatPanel] = useState(false);
 	const { copy } = useClipboard();
 	const [, setToast] = useToasts();
 	const { userBackground } = useContext(MeetingContext);
@@ -148,6 +151,7 @@ const Room = ({ roomName, token }) => {
 
 	return (
 		<div>
+			<div className="flex right-0 absolute">{showChatPanel && <ChatPanel />}</div>
 			<Modal open={shareModal} onClose={() => setShareModal(false)}>
 				<Modal.Title>Share</Modal.Title>
 				<Modal.Subtitle>Invite your friends over!</Modal.Subtitle>
@@ -166,6 +170,7 @@ const Room = ({ roomName, token }) => {
 									text: 'Copied to clipboard',
 									type: 'secondary'
 								});
+								setShareModal(false);
 							}}
 						>
 							Copy
@@ -271,11 +276,6 @@ const Room = ({ roomName, token }) => {
 							toolTipText={'Switch Background'}
 							state={userBackground !== ''}
 							onClick={() => {
-								// if (userBackground) {
-								// 	setUserBgLink('');
-								// 	setUserBackground('');
-								// 	return;
-								// }
 								setShowBgModal(!showBgModal);
 							}}
 							icon={<ChangeBackground />}
@@ -298,6 +298,16 @@ const Room = ({ roomName, token }) => {
 								setShareScreen(!shareScreen);
 							}}
 							icon={<Airplay />}
+						/>
+					</li>
+					<li>
+						<ControlButton
+							toolTipText={'Chat'}
+							state={showChatPanel}
+							onClick={async () => {
+								setShowChatPanel(!showChatPanel);
+							}}
+							icon={<MessageSquare />}
 						/>
 					</li>
 					<li className="hidden md:block">

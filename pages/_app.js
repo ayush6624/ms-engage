@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Provider } from 'next-auth/client';
 import { Header } from '../components/Header';
 import { MeetingProvider } from '../lib/context/token';
+import { ConnectionContextProvider } from '../lib/context/ConnectionContext';
 
 function MyApp({ Component, pageProps }) {
 	const [themeType, setThemeType] = useState('light');
@@ -36,32 +37,34 @@ function MyApp({ Component, pageProps }) {
 	return (
 		<GeistProvider themeType={themeType}>
 			<CssBaseline />
-			<MeetingProvider
-				value={{
-					token,
-					setToken,
-					roomName,
-					setRoomName,
-					setUserBackground,
-					userBackground,
-					userBgLink,
-					setUserBgLink
-				}}
-			>
-				<Provider session={pageProps.session}>
-					<Page>
-						<Page.Header>
-							<Header
-								themeType={themeType}
-								switchTheme={switchThemes}
-							/>
-						</Page.Header>
-						<Page.Content>
-							<Component {...pageProps} />
-						</Page.Content>
-					</Page>
-				</Provider>
-			</MeetingProvider>
+			<ConnectionContextProvider>
+				<MeetingProvider
+					value={{
+						token,
+						setToken,
+						roomName,
+						setRoomName,
+						setUserBackground,
+						userBackground,
+						userBgLink,
+						setUserBgLink
+					}}
+				>
+					<Provider session={pageProps.session}>
+						<Page>
+							<Page.Header>
+								<Header
+									themeType={themeType}
+									switchTheme={switchThemes}
+								/>
+							</Page.Header>
+							<Page.Content>
+								<Component {...pageProps} />
+							</Page.Content>
+						</Page>
+					</Provider>
+				</MeetingProvider>
+			</ConnectionContextProvider>
 		</GeistProvider>
 	);
 }
