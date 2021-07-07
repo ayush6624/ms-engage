@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {  Button, Input, useToasts } from '@geist-ui/react';
+import { Button, Input, useToasts, Text } from '@geist-ui/react';
 import { Send } from '@geist-ui/react-icons';
 import { useConnectionContext } from '../lib/context/ConnectionContext';
 
@@ -7,14 +7,19 @@ function ChatPanel() {
 	const [message, setMessage] = useState('');
 	const { user, sendMessage, chats } = useConnectionContext();
 	return (
-		<div className="right-0 fixed mr-10">
-			<div className="flex-1 p-3 overflow-y-auto flex flex-col space-y-2 max-h-96">
+		<div className="right-0 fixed mr-10 border px-2">
+			<Text h3>Chat</Text>
+			<div
+				id="chatbox"
+				className="flex-1 p-3 overflow-y-auto flex flex-col space-y-2 max-h-96"
+			>
 				{chats.map((chat, idx) => (
 					<div
 						key={idx}
 						className={`rounded py-2 px-3 flex flex-col space-y-1 border-l-2 ${
-							chat.email !== user.user.email ?
-							'border-red-200':"border-blue-300"
+							chat.email !== user.user.email
+								? 'border-red-200'
+								: 'border-blue-300'
 						}`}
 					>
 						<div className="flex items-center justify-between">

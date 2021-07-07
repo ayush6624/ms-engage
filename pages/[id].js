@@ -1,16 +1,30 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { MeetingContext } from '../lib/context/token';
 import Room from '../components/room';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/client';
 import { useConnectionContext } from '../lib/context/ConnectionContext';
+import ChatPanel from '../components/chat';
+import { PlusCircle } from '@geist-ui/react-icons';
+import {
+	Grid,
+	Text,
+	Card,
+	Button,
+	useToasts,
+	Divider,
+} from '@geist-ui/react';
+import { InviteMember } from '../components/Invite';
 
-const Meet = (props) => {
+const Meet = () => {
 	const { query, push } = useRouter();
 	const [session, loading] = useSession();
-	const { token, setToken } = useContext(MeetingContext);
+	const { token, setToken, showMeeting, setShowMeeting } =
+		useContext(MeetingContext);
+
 	const { socketConnected, joinRoom, setRoomId, receiveMessages, setUser } =
 		useConnectionContext();
+	const [_toasts, setToast] = useToasts();
 
 	useEffect(() => {
 		setRoomId(query.id);
@@ -47,7 +61,36 @@ const Meet = (props) => {
 
 	return (
 		<div>
-			{typeof token === 'string' && token.length > 10 && (
+			{!showMeeting && (
+				<div>
+					{<ChatPanel />}
+					<Grid.Container gap={2} direction="row">
+						<Grid md={12}>
+							<Card shadow>
+								<Text>Join the Room</Text>
+								<Button
+									icon={<PlusCircle />}
+									type="success-light"
+									shadow
+									onClick={async () => {
+										console.log('buton clciked');
+										setShowMeeting(true);
+										setToast({
+											text: 'Meeting Started',
+											type: 'success'
+										});
+									}}
+								>
+									Join Meeting
+								</Button>
+								<Divider y={3} />
+								<InviteMember roomName={query.id} />
+							</Card>
+						</Grid>
+					</Grid.Container>
+				</div>
+			)}
+			{typeof token === 'string' && token.length > 10 && showMeeting && (
 				<Room roomName={query.id} token={token} />
 			)}
 		</div>

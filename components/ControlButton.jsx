@@ -1,5 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { Tooltip, useTheme } from '@geist-ui/react';
+import { useContext } from 'react';
+import { MeetingContext } from '../lib/context/token';
 
 export const ChangeBackground = () => (
 	<img
@@ -11,22 +13,28 @@ export const ChangeBackground = () => (
 	/>
 );
 
-export const EndCall = ({ room, push }) => (
-	<button
-		className="p-4 w-24 rounded-full shadow-xl bg-red-600"
-		onClick={() => {
-			console.log('disconnect');
-			room.disconnect();
-			push('/');
-		}}
-	>
-		<img
-			src="https://img.icons8.com/material-outlined/24/000000/end-call.png"
-			className="mx-auto"
-			alt="End Call"
-		/>
-	</button>
-);
+export const EndCall = ({ room, setToast }) => {
+	const { setShowMeeting } = useContext(MeetingContext);
+	return (
+		<button
+			className="p-4 w-24 rounded-full shadow-xl bg-red-600"
+			onClick={() => {
+				room.disconnect();
+				setToast({
+					text: 'Meeting Exited Successfully',
+					type: 'error'
+				});
+				setShowMeeting(false);
+			}}
+		>
+			<img
+				src="https://img.icons8.com/material-outlined/24/000000/end-call.png"
+				className="mx-auto"
+				alt="End Call"
+			/>
+		</button>
+	);
+};
 
 const ControlButton = ({ toolTipText, state, onClick, icon, activeIcon }) => {
 	const theme = useTheme();

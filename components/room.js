@@ -3,26 +3,19 @@ import { useState, useEffect, useContext } from 'react';
 import Video, { LocalVideoTrack } from 'twilio-video';
 import ScreenShare from './screenshare';
 import Participant from './participant';
-import { API_BASE_URL } from '../lib/config';
 import {
 	User,
-	Code,
-	Button,
-	Input,
 	Modal,
 	useClipboard,
 	useToasts
 } from '@geist-ui/react';
 import Confetti from 'react-confetti';
-import { useRouter } from 'next/router';
 import {
 	Mic,
 	MicOff,
 	Camera,
 	CameraOff,
-	Share,
 	Airplay,
-	Clipboard,
 	Headphones,
 	Users,
 	MessageSquare,
@@ -35,6 +28,7 @@ import { MeetingContext } from '../lib/context/token';
 import ControlButton, { ChangeBackground, EndCall } from './ControlButton';
 import VirtualBackgroundModal from './VirtualBackground';
 import ChatPanel from './chat';
+import { InviteMember } from './Invite';
 
 const Room = ({ roomName, token }) => {
 	const [room, setRoom] = useState(null);
@@ -52,7 +46,6 @@ const Room = ({ roomName, token }) => {
 	const { copy } = useClipboard();
 	const [, setToast] = useToasts();
 	const { userBackground } = useContext(MeetingContext);
-	const { push } = useRouter();
 
 	const shareScreenHandler = async () => {
 		if (!screenTrack) {
@@ -151,59 +144,14 @@ const Room = ({ roomName, token }) => {
 
 	return (
 		<div>
-			<div className="flex right-0 absolute">{showChatPanel && <ChatPanel />}</div>
+			<div className="flex right-0 absolute">
+				{showChatPanel && <ChatPanel />}
+			</div>
 			<Modal open={shareModal} onClose={() => setShareModal(false)}>
 				<Modal.Title>Share</Modal.Title>
 				<Modal.Subtitle>Invite your friends over!</Modal.Subtitle>
 				<Modal.Content className="mx-auto">
-					<div className="flex flex-row items-center justify-around">
-						<Code>{roomName}</Code>
-						<Button
-							size="small"
-							auto
-							icon={<Clipboard />}
-							onClick={() => {
-								copy(
-									`https://teams.ayushgoyal.dev/${roomName}`
-								);
-								setToast({
-									text: 'Copied to clipboard',
-									type: 'secondary'
-								});
-								setShareModal(false);
-							}}
-						>
-							Copy
-						</Button>
-					</div>
-
-					<form
-						onSubmit={async (e) => {
-							e.preventDefault();
-							await fetch(`${API_BASE_URL}/invite`, {
-								method: 'POST',
-								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({
-									email: inviteEmail,
-									id: roomName
-								})
-							});
-							setToast({
-								text: 'Invitation Sent Successfully',
-								type: 'success'
-							});
-							setInviteEmail('');
-							setShareModal(false);
-						}}
-						className="mt-3 flex flex-row justify-around items-center"
-					>
-						<Input
-							placeholder="Email ID"
-							type="email"
-							onChange={(e) => setInviteEmail(e.target.value)}
-						></Input>
-						<Input type="submit" icon={<Share />} />
-					</form>
+					<InviteMember roomName={roomName}/>
 					<div className="mt-3">
 						{participants.map((d, i) => (
 							<div key={i} className="my-1">
@@ -319,7 +267,7 @@ const Room = ({ roomName, token }) => {
 						/>
 					</li>
 					<li>
-						<EndCall room={room} push={push} />
+						<EndCall room={room} setToast={setToast} />
 					</li>
 					<li>
 						<ControlButton

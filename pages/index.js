@@ -11,8 +11,7 @@ import {
 	Divider,
 	useToasts
 } from '@geist-ui/react';
-import { XCircleFill } from '@geist-ui/react-icons';
-import { PlusCircle } from '@geist-ui/react-icons';
+import { XCircleFill, PlusCircle } from '@geist-ui/react-icons';
 import { useSession } from 'next-auth/client';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';

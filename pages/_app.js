@@ -33,6 +33,7 @@ function MyApp({ Component, pageProps }) {
 	const [roomName, setRoomName] = useState('');
 	const [userBackground, setUserBackground] = useState('');
 	const [userBgLink, setUserBgLink] = useState('');
+	const [showMeeting, setShowMeeting] = useState(false);
 
 	return (
 		<GeistProvider themeType={themeType}>
@@ -47,7 +48,9 @@ function MyApp({ Component, pageProps }) {
 						setUserBackground,
 						userBackground,
 						userBgLink,
-						setUserBgLink
+						setUserBgLink,
+						showMeeting,
+						setShowMeeting
 					}}
 				>
 					<Provider session={pageProps.session}>

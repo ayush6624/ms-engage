@@ -8,11 +8,15 @@ export const MeetingContext = createContext<{
 	setUserBackground?: Dispatch<SetStateAction<string>>;
 	userBgLink?: string;
 	setUserBgLink?: Dispatch<SetStateAction<string>>;
+	
+	showMeeting?: boolean;
+	setShowMeeting?: Dispatch<SetStateAction<boolean>>;
 }>({
 	token: '',
 	roomName: '',
 	userBackground: '',
-	userBgLink: ''
+	userBgLink: '',
+	showMeeting: false
 });
 
 export const MeetingProvider = MeetingContext.Provider;
