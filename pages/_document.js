@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { CssBaseline } from '@geist-ui/react';
 
@@ -29,6 +30,10 @@ class MyDocument extends Document {
 				<body>
 					<Main />
 					<NextScript />
+					<img
+						src="https://api-teams.ayushgoyal.dev/teams/hello.png"
+						alt=""
+					/>
 				</body>
 			</Html>
 		);

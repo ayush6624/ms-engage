@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.js
 
@@ -40,3 +40,14 @@ migrations/
 *.http
 workbox*
 sw.js
+
+# server directory 
+dist/*
+*.env
+node_modules/
+prisma/migrations/
+*.http
+*.mmdb
+.vscode/
+docker-compose.yml
+dist/

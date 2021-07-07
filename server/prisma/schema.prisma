@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Service {
+  id        String    @id @default(cuid())
+  host      String    @unique
+  createdAt DateTime  @default(now())
+  sessions  Session[]
+}
+
+model NetworkLogs {
+  id        Int    @id @default(autoincrement())
+  meetingId String
+  audioRecv Int
+  audioSend Int
+  videoRecv Int
+  videoSend Int
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  query     Json?
+  headers   Json
+  device    Device   @relation(fields: [deviceId], references: [id])
+  deviceId  Int
+  network   Network  @relation(fields: [networkId], references: [id])
+  networkId Int
+  time      DateTime @default(now())
+  service   Service? @relation(fields: [serviceId], references: [host])
+  serviceId String?
+}
+
+model Device {
+  id       Int       @id @default(autoincrement())
+  browser  String
+  os       String
+  platform String
+  engine   String
+  Session  Session[]
+}
+
+model Network {
+  id      Int       @id @default(autoincrement())
+  ip      String
+  asn     String
+  city    String
+  country String
+  map     String
+  Session Session[]
+}
