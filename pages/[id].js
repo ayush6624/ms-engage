@@ -6,14 +6,7 @@ import { useSession } from 'next-auth/client';
 import { useConnectionContext } from '../lib/context/ConnectionContext';
 import ChatPanel from '../components/chat';
 import { PlusCircle } from '@geist-ui/react-icons';
-import {
-	Grid,
-	Text,
-	Card,
-	Button,
-	useToasts,
-	Divider,
-} from '@geist-ui/react';
+import { Grid, Text, Card, Button, useToasts, Divider } from '@geist-ui/react';
 import { InviteMember } from '../components/Invite';
 
 const Meet = () => {
@@ -22,8 +15,14 @@ const Meet = () => {
 	const { token, setToken, showMeeting, setShowMeeting } =
 		useContext(MeetingContext);
 
-	const { socketConnected, joinRoom, setRoomId, receiveMessages, setUser } =
-		useConnectionContext();
+	const {
+		socketConnected,
+		joinRoom,
+		setRoomId,
+		receiveMessages,
+		receiveCelebration,
+		setUser
+	} = useConnectionContext();
 	const [_toasts, setToast] = useToasts();
 
 	useEffect(() => {
@@ -35,8 +34,8 @@ const Meet = () => {
 		if (socketConnected.current) {
 			joinRoom();
 			receiveMessages();
+			receiveCelebration();
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [socketConnected.current]);
 
 	if (loading) return <div>Authenticating</div>;
@@ -63,7 +62,11 @@ const Meet = () => {
 		<div>
 			{!showMeeting && (
 				<div>
-					{<ChatPanel />}
+					{
+						<div className="hidden md:block">
+							<ChatPanel />
+						</div>
+					}
 					<Grid.Container gap={2} direction="row">
 						<Grid md={12}>
 							<Card shadow>
@@ -84,6 +87,7 @@ const Meet = () => {
 									Join Meeting
 								</Button>
 								<Divider y={3} />
+								<Text>Invite your friends over!</Text>
 								<InviteMember roomName={query.id} />
 							</Card>
 						</Grid>

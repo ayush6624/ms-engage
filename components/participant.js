@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useContext } from 'react';
-import styles from './participant.module.css';
 import { MeetingContext } from '../lib/context/token';
 import { API_BASE_URL } from '../lib/config';
+import { Mic, MicOff, Camera, CameraOff } from '@geist-ui/react-icons';
+import { Card } from '@geist-ui/react';
 
 const Participant = ({
 	meetingId,
@@ -10,15 +11,15 @@ const Participant = ({
 	setScreenTrack
 }) => {
 	function printNetworkQualityStats(networkQualityLevel, networkStats) {
-		console.log(
+		const quality =
 			{
 				1: '▃',
 				2: '▃▄',
 				3: '▃▄▅',
 				4: '▃▄▅▆',
 				5: '▃▄▅▆▇'
-			}[networkQualityLevel] || ''
-		);
+			}[networkQualityLevel] || '';
+		setNwquality(quality);
 		if (networkStats) {
 			fetch(`${API_BASE_URL}/health`, {
 				method: 'POST',
@@ -36,6 +37,9 @@ const Participant = ({
 	const [videoTracks, setVideoTracks] = useState([]);
 	const [audioTracks, setAudioTracks] = useState([]);
 	const { userBackground, userBgLink } = useContext(MeetingContext);
+	const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+	const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+	const [nwQuality, setNwquality] = useState('');
 
 	const videoRef = useRef();
 	const audioRef = useRef();
@@ -46,12 +50,36 @@ const Participant = ({
 			.filter((track) => track !== null);
 
 	useEffect(() => {
+		const trackDisabled = (track) => {
+			track.on('disabled', () => {
+				if (track.kind === 'video') {
+					setIsVideoEnabled(false);
+				}
+				if (track.kind === 'audio') {
+					setIsAudioEnabled(false);
+				}
+			});
+		};
+
+		const trackEnabled = (track) => {
+			track.on('enabled', () => {
+				if (track.kind === 'video') {
+					setIsVideoEnabled(true);
+				}
+				if (track.kind === 'audio') {
+					setIsAudioEnabled(true);
+				}
+			});
+		};
+
 		const trackSubscribed = (track) => {
 			if (track.kind === 'video') {
 				setVideoTracks((videoTracks) => [...videoTracks, track]);
 			} else {
 				setAudioTracks((audioTracks) => [...audioTracks, track]);
 			}
+			trackDisabled(track);
+			trackEnabled(track);
 		};
 
 		const trackUnsubscribed = (track) => {
@@ -79,7 +107,17 @@ const Participant = ({
 			}
 			setScreenTrack(remoteTrackPublication.track);
 		});
+		participant.tracks.forEach((publication) => {
+			if (publication.track) {
+				trackDisabled(publication.track);
+				trackEnabled(publication.track);
 
+				publication.track.on('disabled', (track) =>
+					trackDisabled(track)
+				);
+				publication.track.on('enabled', (track) => trackEnabled(track));
+			}
+		});
 		participant.on('trackUnpublished', (remoteTrackPublication) => {
 			setScreenTrack(null);
 		});
@@ -136,7 +174,6 @@ const Participant = ({
 			);
 
 			const img = new Image();
-			console.log('img element-------');
 			img.src = userBgLink ?? '/twilio-video-processor/vacation.jpg';
 			img.onload = () => {
 				const virtualBg = new VirtualBackgroundProcessor({
@@ -188,20 +225,31 @@ const Participant = ({
 	}
 
 	return (
-		<div className="relative border border-green-400 rounded-xl">
-			<p className="absolute bottom-0 mb-3 ml-5 shadow-xl text-white">
-				{participant.identity}
-			</p>
+		<Card hoverable shadow className="relative rounded-xl">
 			<video
 				// src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-				className={styles.video}
 				ref={videoRef}
 				autoPlay={true}
-				width="350px"
-				height="350px"
+				className="max-h-100 max-w-md"
 			/>
 			<audio ref={audioRef} autoPlay={true} muted={false} />
-		</div>
+			<div className="mb-3 mt-3 flex flex-row space-x-3 items-center w-full">
+				{isAudioEnabled ? (
+					<Mic className="h-5 w-5" />
+				) : (
+					<MicOff className="h-5 w-5" />
+				)}
+				{isVideoEnabled ? (
+					<Camera className="h-5 w-5" />
+				) : (
+					<CameraOff className="h-5 w-5" />
+				)}
+				<span>{nwQuality}</span>
+				<span>
+					{participant.identity} {isHost ? '(You)' : ''}
+				</span>
+			</div>
+		</Card>
 	);
 };
 

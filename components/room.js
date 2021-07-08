@@ -3,12 +3,7 @@ import { useState, useEffect, useContext } from 'react';
 import Video, { LocalVideoTrack } from 'twilio-video';
 import ScreenShare from './screenshare';
 import Participant from './participant';
-import {
-	User,
-	Modal,
-	useClipboard,
-	useToasts
-} from '@geist-ui/react';
+import { User, Modal, useToasts } from '@geist-ui/react';
 import Confetti from 'react-confetti';
 import {
 	Mic,
@@ -29,10 +24,10 @@ import ControlButton, { ChangeBackground, EndCall } from './ControlButton';
 import VirtualBackgroundModal from './VirtualBackground';
 import ChatPanel from './chat';
 import { InviteMember } from './Invite';
+import { useConnectionContext } from '../lib/context/ConnectionContext';
 
 const Room = ({ roomName, token }) => {
 	const [room, setRoom] = useState(null);
-	const [inviteEmail, setInviteEmail] = useState();
 	const [showBgModal, setShowBgModal] = useState(false);
 	const [participants, setParticipants] = useState([]); // ['x', 'y']
 	const [showConfetti, setShowConfetti] = useState(false);
@@ -43,9 +38,9 @@ const Room = ({ roomName, token }) => {
 	const [screenTrack, setScreenTrack] = useState(null);
 	const [showWhiteboard, setShowWhiteboard] = useState(false);
 	const [showChatPanel, setShowChatPanel] = useState(false);
-	const { copy } = useClipboard();
 	const [, setToast] = useToasts();
 	const { userBackground } = useContext(MeetingContext);
+	const { celebrate } = useConnectionContext();
 
 	const shareScreenHandler = async () => {
 		if (!screenTrack) {
@@ -74,6 +69,7 @@ const Room = ({ roomName, token }) => {
 
 	useEffect(() => {
 		if (showConfetti) {
+			celebrate();
 			setTimeout(() => {
 				setShowConfetti(false);
 			}, 5000);
@@ -151,7 +147,7 @@ const Room = ({ roomName, token }) => {
 				<Modal.Title>Share</Modal.Title>
 				<Modal.Subtitle>Invite your friends over!</Modal.Subtitle>
 				<Modal.Content className="mx-auto">
-					<InviteMember roomName={roomName}/>
+					<InviteMember roomName={roomName} />
 					<div className="mt-3">
 						{participants.map((d, i) => (
 							<div key={i} className="my-1">
@@ -208,6 +204,7 @@ const Room = ({ roomName, token }) => {
 							onClick={() => {
 								room.localParticipant.videoTracks.forEach(
 									(publication) => {
+										
 										camera
 											? publication.track.disable()
 											: publication.track.enable();

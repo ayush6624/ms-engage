@@ -4,8 +4,7 @@ import { Loading } from '@geist-ui/react';
 const LoadingComponent = () => <Loading>Loading</Loading>;
 
 const Excalidraw = dynamic(() => import('@excalidraw/excalidraw-next'), {
-	ssr: false,
-	loading: LoadingComponent
+	ssr: false
 });
 
 export default function Whiteboard() {
