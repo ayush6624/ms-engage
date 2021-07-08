@@ -25,7 +25,6 @@
 		"unique-names-generator": "^4.5.0"
 	},
 	"devDependencies": {
-		"@excalidraw/excalidraw-next": "^0.8.0-2d279cb",
 		"@types/react": "^17.0.11",
 		"autoprefixer": "^10.2.6",
 		"eslint": "^7.28.0",

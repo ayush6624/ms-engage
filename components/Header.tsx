@@ -1,33 +1,31 @@
-import {
-	Image,
-	Grid,
-	ButtonDropdown,
-	User,
-	Button
-} from '@geist-ui/react';
+import { Image, Grid, ButtonDropdown, User, Button } from '@geist-ui/react';
 import { useSession, signOut, signin } from 'next-auth/client';
 import { BASE_URL } from '../lib/url';
 import { useRouter } from 'next/router';
 import { Moon, Sun } from '@geist-ui/react-icons';
 import { FcGoogle } from 'react-icons/fc';
+import { SwitchThemeType, ThemeType } from '../lib/types';
 
-export function Header({ themeType, switchTheme }) {
-	const [session, loading] = useSession();
+interface HeaderProps {
+	/* Current theme */
+	themeType: ThemeType;
+
+	/* Switches between the themes */
+	switchTheme: SwitchThemeType;
+}
+
+const Header: React.FC<HeaderProps> = ({ themeType, switchTheme }) => {
+	const [session, loading] = useSession(); // current user session and loading state
 	const { push } = useRouter();
 
 	return (
 		<Grid.Container justify="space-between" className="pt-3">
 			<Grid>
 				<button onClick={() => push('/')}>
-					<Image
-						src="/logo.png"
-						width="40"
-						height="40"
-						alt="logo"
-					/>
+					<Image src="/logo.png" width={40} height={40} alt="logo" />
 				</button>
 			</Grid>
-			<Grid span={5} className="">
+			<Grid>
 				{!session ? (
 					<Button
 						loading={loading}
@@ -70,4 +68,6 @@ export function Header({ themeType, switchTheme }) {
 			</Grid>
 		</Grid.Container>
 	);
-}
+};
+
+export { Header };

@@ -4,8 +4,8 @@ import { API_BASE_URL } from '../lib/config';
 import { useState } from 'react';
 
 export const InviteMember = ({ roomName }) => {
-	const [inviteEmail, setInviteEmail] = useState();
-	const { copy } = useClipboard();
+	const [inviteEmail, setInviteEmail] = useState<string>(''); // manages the invitee's email
+	const { copy } = useClipboard(); // copy content to clipboard
 	const [, setToast] = useToasts();
 
 	return (
@@ -30,6 +30,7 @@ export const InviteMember = ({ roomName }) => {
 			<form
 				onSubmit={async (e) => {
 					e.preventDefault();
+					// Sends an email to the invitee with the meeting link
 					await fetch(`${API_BASE_URL}/invite`, {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
@@ -49,7 +50,7 @@ export const InviteMember = ({ roomName }) => {
 				<Input
 					placeholder="Email ID"
 					type="email"
-                    value={inviteEmail}
+					value={inviteEmail}
 					onChange={(e) => setInviteEmail(e.target.value)}
 				></Input>
 				<Input type="submit" icon={<Share />} />

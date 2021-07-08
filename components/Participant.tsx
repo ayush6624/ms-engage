@@ -1,16 +1,59 @@
-import { useState, useEffect, useRef, useContext } from 'react';
-import { MeetingContext } from '../lib/context/token';
+import {
+	useState,
+	useEffect,
+	useRef,
+	useContext,
+	Dispatch,
+	SetStateAction
+} from 'react';
+import { MeetingContext } from '../lib/context/tokenContext';
 import { API_BASE_URL } from '../lib/config';
 import { Mic, MicOff, Camera, CameraOff } from '@geist-ui/react-icons';
 import { Card } from '@geist-ui/react';
+import {
+	LocalParticipant,
+	LocalVideoTrack,
+	NetworkQualityStats,
+	RemoteParticipant,
+	RemoteTrack
+} from 'twilio-video';
+import { AllTrackPublications, AllTrackTypes, bgType } from '../lib/types';
 
-const Participant = ({
+interface ParticipantProps {
+	/* Current meeting / room id */
+	meetingId: string;
+
+	/* Participant (Remote/Local) */
+	participant?: RemoteParticipant | LocalParticipant;
+
+	/* If the currentparticipant is a local (and host) participant */
+	isHost?: boolean;
+
+	/* Sets the screen share track */
+	setScreenTrack?: Dispatch<SetStateAction<LocalVideoTrack | RemoteTrack>>;
+}
+
+const Participant: React.FC<ParticipantProps> = ({
 	meetingId,
 	participant,
 	isHost = false,
 	setScreenTrack
 }) => {
-	function printNetworkQualityStats(networkQualityLevel, networkStats) {
+	const [videoTracks, setVideoTracks] = useState<AllTrackTypes[]>([]); // Manages the video tracks of a participant
+	const [audioTracks, setAudioTracks] = useState([]); // Manages the audio tracks of a participant
+	const { userBackground, userBgLink } = useContext(MeetingContext); // Manages the virtual background of a participant
+	const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(true); // If the participant's video is enabled
+	const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(true); // If the participant's audio is enabled
+	const [nwQuality, setNwquality] = useState<string>(''); // Manages the network quality of a participant
+	const [virtualBackground, setVirtualBackground] = useState<any>();
+	const [blurBackground, setBlurBackground] = useState<any>(); // Manages the blur background of a participant
+	const videoRef = useRef<HTMLVideoElement>(); // Manages the video of a participant
+	const audioRef = useRef<HTMLAudioElement>(); // Manages the audio of a participant
+
+	const printNetworkQualityStats = (
+		networkQualityLevel: number | string,
+		networkStats: NetworkQualityStats
+	) => {
 		const quality =
 			{
 				1: '▃',
@@ -21,36 +64,30 @@ const Participant = ({
 			}[networkQualityLevel] || '';
 		setNwquality(quality);
 		if (networkStats) {
+			// Post the current network participants to the API (Scale of 1 - 5)
 			fetch(`${API_BASE_URL}/health`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					meetingId,
-					audioRecv: networkStats.audio.recv,
-					audioSend: networkStats.audio.send,
-					videoRecv: networkStats.video.recv,
-					videoSend: networkStats.video.send
+					audioRecv: networkStats.audio.recv, // Audio received
+					audioSend: networkStats.audio.send, // Audio sent
+					videoRecv: networkStats.video.recv, // Video received
+					videoSend: networkStats.video.send // Video sent
 				})
 			});
 		}
-	}
-	const [videoTracks, setVideoTracks] = useState([]);
-	const [audioTracks, setAudioTracks] = useState([]);
-	const { userBackground, userBgLink } = useContext(MeetingContext);
-	const [isVideoEnabled, setIsVideoEnabled] = useState(true);
-	const [isAudioEnabled, setIsAudioEnabled] = useState(true);
-	const [nwQuality, setNwquality] = useState('');
+	};
 
-	const videoRef = useRef();
-	const audioRef = useRef();
-
-	const trackPubsToTracks = (trackMap) =>
+	// Keeps track of all the publications (audio + video) and also removes the ones that are not used anymore
+	const trackPubsToTracks = (trackMap: Map<string, AllTrackPublications>) =>
 		Array.from(trackMap.values())
 			.map((publication) => publication.track)
 			.filter((track) => track !== null);
 
 	useEffect(() => {
-		const trackDisabled = (track) => {
+		// Track Disabled Event Listener
+		const trackDisabled = (track: RemoteTrack) => {
 			track.on('disabled', () => {
 				if (track.kind === 'video') {
 					setIsVideoEnabled(false);
@@ -61,7 +98,8 @@ const Participant = ({
 			});
 		};
 
-		const trackEnabled = (track) => {
+		// Track Enabled Event Listener
+		const trackEnabled = (track: RemoteTrack) => {
 			track.on('enabled', () => {
 				if (track.kind === 'video') {
 					setIsVideoEnabled(true);
@@ -72,7 +110,8 @@ const Participant = ({
 			});
 		};
 
-		const trackSubscribed = (track) => {
+		// Adds tracks to state
+		const trackSubscribed = (track: RemoteTrack) => {
 			if (track.kind === 'video') {
 				setVideoTracks((videoTracks) => [...videoTracks, track]);
 			} else {
@@ -82,7 +121,8 @@ const Participant = ({
 			trackEnabled(track);
 		};
 
-		const trackUnsubscribed = (track) => {
+		//  Removes unsubscribed tracks from state
+		const trackUnsubscribed = (track: RemoteTrack) => {
 			if (track.kind === 'video') {
 				setVideoTracks((videoTracks) =>
 					videoTracks.filter((v) => v !== track)
@@ -99,6 +139,7 @@ const Participant = ({
 		participant.on('trackSubscribed', trackSubscribed);
 		participant.on('trackUnsubscribed', trackUnsubscribed);
 		participant.on('trackPublished', async (remoteTrackPublication) => {
+			// Shows new video tracks from the same participant (in case of screen sharing)
 			while (true) {
 				if (remoteTrackPublication.track) break;
 				await new Promise((res) => {
@@ -107,26 +148,36 @@ const Participant = ({
 			}
 			setScreenTrack(remoteTrackPublication.track);
 		});
+
+		// Loops through all the tracks and calls the appropirate functions
 		participant.tracks.forEach((publication) => {
 			if (publication.track) {
 				trackDisabled(publication.track);
 				trackEnabled(publication.track);
 
-				publication.track.on('disabled', (track) =>
+				publication.track.on('disabled', (track: RemoteTrack) =>
 					trackDisabled(track)
 				);
-				publication.track.on('enabled', (track) => trackEnabled(track));
+				publication.track.on('enabled', (track: RemoteTrack) =>
+					trackEnabled(track)
+				);
 			}
 		});
-		participant.on('trackUnpublished', (remoteTrackPublication) => {
+
+		// Listner for screenshare disabled
+		participant.on('trackUnpublished', () => {
 			setScreenTrack(null);
 		});
+
+		// Listner for change in network quality
 		participant.on('networkQualityLevelChanged', printNetworkQualityStats);
 		printNetworkQualityStats(
 			participant.networkQualityLevel,
+			//@ts-ignore
 			participant.networkStats
 		);
 
+		// Cleanup all tracks on unmount
 		return () => {
 			setVideoTracks([]);
 			setAudioTracks([]);
@@ -135,6 +186,7 @@ const Participant = ({
 	}, [participant]);
 
 	useEffect(() => {
+		// Appends video to DOM
 		const videoTrack = videoTracks[0];
 		if (videoTrack) {
 			videoTrack.attach(videoRef.current);
@@ -145,6 +197,7 @@ const Participant = ({
 	}, [videoTracks]);
 
 	useEffect(() => {
+		// Appends audio to DOM
 		const audioTrack = audioTracks[0];
 		if (audioTrack) {
 			audioTrack.attach(audioRef.current);
@@ -154,10 +207,8 @@ const Participant = ({
 		}
 	}, [audioTracks]);
 
-	const [virtualBackground, setVirtualBackground] = useState();
-	const [blurBackground, setBlurBackground] = useState();
-
 	useEffect(() => {
+		// Dynamically import library client-side and sets a Gaussian Blur filter
 		const blurBackgroundHelper = async () => {
 			const { GaussianBlurBackgroundProcessor } = await import(
 				'@twilio/video-processors'
@@ -168,6 +219,7 @@ const Participant = ({
 			setBlurBackground(blurBg);
 		};
 
+		// Dynamic import library client-side and sets a Image as bg
 		const virtualBackgroundHelper = async () => {
 			const { VirtualBackgroundProcessor } = await import(
 				'@twilio/video-processors'
@@ -194,20 +246,23 @@ const Participant = ({
 		}
 	}, [userBackground, virtualBackground, blurBackground]);
 
-	const setProcessor = (processor, track) => {
+	// Sets an (intermediate) processor to the video stream
+	const setProcessor = (processor: any, track) => {
 		removeProcessor(track);
 		if (processor) {
 			track?.addProcessor(processor);
 		}
 	};
 
+	// Removes the processor from the video stream
 	const removeProcessor = (track) => {
 		if (track?.processor) {
 			track?.removeProcessor(track.processor);
 		}
 	};
 
-	function toggleBackground(bgType) {
+	// Toggles between blur and virtual background
+	const toggleBackground = (bgType: bgType) => {
 		if (!isHost) return;
 		if (!videoTracks[0]) return;
 		const videoTrack = videoTracks[0];
@@ -222,12 +277,11 @@ const Participant = ({
 		backgroundProcessor
 			.loadModel()
 			.then(() => setProcessor(backgroundProcessor, videoTrack));
-	}
+	};
 
 	return (
 		<Card hoverable shadow className="relative rounded-xl">
 			<video
-				// src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
 				ref={videoRef}
 				autoPlay={true}
 				className="max-h-100 max-w-md"

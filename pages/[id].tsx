@@ -1,19 +1,20 @@
-import { useContext, useEffect, useState } from 'react';
-import { MeetingContext } from '../lib/context/token';
-import Room from '../components/room';
+import { useContext, useEffect } from 'react';
+import { MeetingContext } from '../lib/context/tokenContext';
+import Room from '../components/Room';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/client';
 import { useConnectionContext } from '../lib/context/ConnectionContext';
-import ChatPanel from '../components/chat';
+import ChatPanel from '../components/Chat';
 import { PlusCircle } from '@geist-ui/react-icons';
 import { Grid, Text, Card, Button, useToasts, Divider } from '@geist-ui/react';
 import { InviteMember } from '../components/Invite';
 
-const Meet = () => {
-	const { query, push } = useRouter();
-	const [session, loading] = useSession();
+// Renders the Meeting's Room
+const RoomPage = (): JSX.Element => {
+	const { query, push } = useRouter(); // manage client-side-routing
+	const [session, loading] = useSession(); // manage session state
 	const { token, setToken, showMeeting, setShowMeeting } =
-		useContext(MeetingContext);
+		useContext(MeetingContext); // manage meeting context
 
 	const {
 		socketConnected,
@@ -23,7 +24,7 @@ const Meet = () => {
 		receiveCelebration,
 		setUser
 	} = useConnectionContext();
-	const [_toasts, setToast] = useToasts();
+	const [_toasts, setToast] = useToasts(); // Manage Toast notifications
 
 	useEffect(() => {
 		setRoomId(query.id);
@@ -38,12 +39,15 @@ const Meet = () => {
 		}
 	}, [socketConnected.current]);
 
-	if (loading) return <div>Authenticating</div>;
+	if (loading) return <div>Authenticating</div>; // If loading user auth state, return a loading message
 	if (session === null) {
+		//If not logged in, redirect to home page
+		setToast({ text: 'Please log in first', type: 'error' });
 		push('/');
 		return <div>Please login first!</div>;
 	}
 	if (token === '') {
+		// Fetch paticipants auth token to connect to the meeting
 		fetch('/api/room', {
 			method: 'POST',
 			body: JSON.stringify({
@@ -61,6 +65,7 @@ const Meet = () => {
 	return (
 		<div>
 			{!showMeeting && (
+				// Show room metadata before joining the room
 				<div>
 					{
 						<div className="hidden md:block">
@@ -95,10 +100,11 @@ const Meet = () => {
 				</div>
 			)}
 			{typeof token === 'string' && token.length > 10 && showMeeting && (
-				<Room roomName={query.id} token={token} />
+				// Render the meeting component if user joins the meeting
+				<Room roomName={query.id as string} token={token} />
 			)}
 		</div>
 	);
 };
 
-export default Meet;
+export default RoomPage;

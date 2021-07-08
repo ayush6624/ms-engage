@@ -16,17 +16,23 @@ import { useSession } from 'next-auth/client';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import { FaRegKeyboard } from 'react-icons/fa';
-import { MeetingContext } from '../lib/context/token';
+import { MeetingContext } from '../lib/context/tokenContext';
 
-export default function Home() {
-	const [session] = useSession();
-	const { push } = useRouter();
-	const [_toasts, setToast] = useToasts();
-	const { setToken } = useContext(MeetingContext);
-	const [joinRoom, setJoinRoom] = useState('');
-	const [prevMeeting, setPrevMeeting] = useState();
+const Home = (): JSX.Element => {
+	const [session] = useSession(); // Fetches the (logged-in) user's session, otherwise null
+	const { push } = useRouter(); // Client side router pusher
+	const [_toasts, setToast] = useToasts(); // Toasts Alerts
+	const { setToken } = useContext(MeetingContext); // Sets the token on joining a meeting
+	const [joinRoom, setJoinRoom] = useState<string>(''); // Manages user entered room name
+	const [prevMeeting, setPrevMeeting] = useState<string | undefined>(); // Manages any previous meetings of a user
 
-	const handleSubmit = async (username, roomName) => {
+	/**
+	 * Fetches room details and token from the API
+	 *
+	 * @param {string} username
+	 * @param {string} [roomName]
+	 */
+	const handleSubmit = async (username: string, roomName?: string) => {
 		const data = await fetch('/api/room', {
 			method: 'POST',
 			body: JSON.stringify({
@@ -42,6 +48,7 @@ export default function Home() {
 	};
 
 	useEffect(() => {
+		// Shows previous meeting if any
 		let prevMeeingId = window.localStorage.getItem('prevMeeting');
 		if (prevMeeingId) setPrevMeeting(prevMeeingId);
 	}, []);
@@ -83,7 +90,6 @@ export default function Home() {
 							className="flex flex-row justify-between"
 							onSubmit={async (e) => {
 								e.preventDefault();
-								console.log(e.roomname);
 								if (session) {
 									setToast({
 										text: 'Meeting Joined Successfully',
@@ -134,7 +140,7 @@ export default function Home() {
 											window.localStorage.removeItem(
 												'prevMeeting'
 											);
-											setPrevMeeting();
+											setPrevMeeting('');
 										}}
 									>
 										<XCircleFill />
@@ -148,11 +154,13 @@ export default function Home() {
 					<Image
 						src="/homepageimg.jpg"
 						alt="Promotional Image"
-						width="500px"
-						height="300px"
+						width={500}
+						height={300}
 					/>
 				</Grid>
 			</Grid.Container>
 		</>
 	);
-}
+};
+
+export default Home;

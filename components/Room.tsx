@@ -1,8 +1,11 @@
-/* eslint-disable @next/next/no-img-element */
 import { useState, useEffect, useContext } from 'react';
-import Video, { LocalVideoTrack } from 'twilio-video';
-import ScreenShare from './screenshare';
-import Participant from './participant';
+import Video, {
+	LocalVideoTrack,
+	RemoteParticipant,
+	Room as RoomType
+} from 'twilio-video';
+import ScreenShare from './ScreenShare';
+import Participant from './Participant';
 import { User, Modal, useToasts } from '@geist-ui/react';
 import Confetti from 'react-confetti';
 import {
@@ -11,33 +14,33 @@ import {
 	Camera,
 	CameraOff,
 	Airplay,
-	Headphones,
 	Users,
-	MessageSquare,
-	ThumbsUp
+	MessageSquare
 } from '@geist-ui/react-icons';
 import { GiPartyPopper } from 'react-icons/gi';
-import { FaChalkboardTeacher } from 'react-icons/fa';
-import Whiteboard from './whiteboard';
-import { MeetingContext } from '../lib/context/token';
+import { MeetingContext } from '../lib/context/tokenContext';
 import ControlButton, { ChangeBackground, EndCall } from './ControlButton';
 import VirtualBackgroundModal from './VirtualBackground';
-import ChatPanel from './chat';
+import ChatPanel from './Chat';
 import { InviteMember } from './Invite';
 import { useConnectionContext } from '../lib/context/ConnectionContext';
 
-const Room = ({ roomName, token }) => {
-	const [room, setRoom] = useState(null);
+interface RoomProps {
+	roomName: string;
+	token: string;
+}
+
+const Room: React.FC<RoomProps> = ({ roomName, token }) => {
+	const [room, setRoom] = useState<RoomType>(null);
 	const [showBgModal, setShowBgModal] = useState(false);
-	const [participants, setParticipants] = useState([]); // ['x', 'y']
+	const [participants, setParticipants] = useState<RemoteParticipant[]>([]);
 	const [showConfetti, setShowConfetti] = useState(false);
-	const [mic, setMic] = useState(true);
-	const [camera, setCamera] = useState(true);
-	const [shareModal, setShareModal] = useState(false);
-	const [shareScreen, setShareScreen] = useState(false);
-	const [screenTrack, setScreenTrack] = useState(null);
-	const [showWhiteboard, setShowWhiteboard] = useState(false);
-	const [showChatPanel, setShowChatPanel] = useState(false);
+	const [mic, setMic] = useState<boolean>(true);
+	const [camera, setCamera] = useState<boolean>(true);
+	const [shareModal, setShareModal] = useState<boolean>(false);
+	const [shareScreen, setShareScreen] = useState<boolean>(false);
+	const [screenTrack, setScreenTrack] = useState<LocalVideoTrack>(null);
+	const [showChatPanel, setShowChatPanel] = useState<boolean>(false);
 	const [, setToast] = useToasts();
 	const { userBackground } = useContext(MeetingContext);
 	const { celebrate } = useConnectionContext();
@@ -45,8 +48,9 @@ const Room = ({ roomName, token }) => {
 	const shareScreenHandler = async () => {
 		if (!screenTrack) {
 			navigator.mediaDevices
+				//@ts-ignore
 				.getDisplayMedia()
-				.then((stream) => {
+				.then((stream: any) => {
 					const temp = new LocalVideoTrack(stream.getTracks()[0]);
 					setScreenTrack(temp);
 					room.localParticipant.publishTrack(temp);
@@ -54,7 +58,7 @@ const Room = ({ roomName, token }) => {
 						shareScreenHandler();
 					};
 				})
-				.catch((err) => setShareScreen(false));
+				.catch(() => setShareScreen(false));
 		} else {
 			room.localParticipant.unpublishTrack(screenTrack);
 			screenTrack.stop();
@@ -78,13 +82,15 @@ const Room = ({ roomName, token }) => {
 
 	useEffect(() => {
 		async function helper() {
-			const participantConnected = (participant) => {
+			const participantConnected = (participant: RemoteParticipant) => {
 				setParticipants((prevParticipants) => [
 					...prevParticipants,
 					participant
 				]);
 			};
-			const participantDisconnected = (participant) => {
+			const participantDisconnected = (
+				participant: RemoteParticipant
+			) => {
 				setParticipants((prevParticipants) =>
 					prevParticipants.filter((p) => p !== participant)
 				);
@@ -95,7 +101,6 @@ const Room = ({ roomName, token }) => {
 					local: 1,
 					remote: 2
 				}
-				// tracks
 			}).then((room) => {
 				setRoom(room);
 				room.localParticipant.setNetworkQualityConfiguration({
@@ -118,6 +123,7 @@ const Room = ({ roomName, token }) => {
 					currentRoom.localParticipant.tracks.forEach(function (
 						trackPublication
 					) {
+						//@ts-ignore
 						trackPublication.track.stop();
 					});
 					currentRoom.disconnect();
@@ -163,20 +169,13 @@ const Room = ({ roomName, token }) => {
 					Done
 				</Modal.Action>
 			</Modal>
-			<Modal
-				open={showWhiteboard}
-				width="70vw"
-				onClose={() => setShowWhiteboard(false)}
-			>
-				<Whiteboard />
-			</Modal>
 			{showBgModal && (
 				<VirtualBackgroundModal
 					showModal={showBgModal}
 					setShowModal={setShowBgModal}
 				/>
 			)}
-			{showConfetti && <Confetti width={'1000px'} height={'800px'} />}
+			{showConfetti && <Confetti width={1000} height={800} />}
 			<aside className="absolute bottom-0 w-full z-20 items-center text-gray-700 shadow-xl rounded-xl flex justify-center">
 				<ul className="flex flex-row space-x-5 flex-wrap">
 					<li>
@@ -204,7 +203,6 @@ const Room = ({ roomName, token }) => {
 							onClick={() => {
 								room.localParticipant.videoTracks.forEach(
 									(publication) => {
-										
 										camera
 											? publication.track.disable()
 											: publication.track.enable();
@@ -253,14 +251,6 @@ const Room = ({ roomName, token }) => {
 								setShowChatPanel(!showChatPanel);
 							}}
 							icon={<MessageSquare />}
-						/>
-					</li>
-					<li className="hidden md:block">
-						<ControlButton
-							toolTipText={'WhiteBoard'}
-							state={showWhiteboard}
-							onClick={() => setShowWhiteboard(true)}
-							icon={<FaChalkboardTeacher size="25px" />}
 						/>
 					</li>
 					<li>

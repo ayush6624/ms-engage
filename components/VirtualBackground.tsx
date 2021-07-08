@@ -1,9 +1,22 @@
-import { Button, Image, Modal, useToasts } from '@geist-ui/react';
+import { Button, Image, Modal } from '@geist-ui/react';
 import { CheckInCircle } from '@geist-ui/react-icons';
+import { Dispatch, SetStateAction } from 'react';
 import { useContext } from 'react';
-import { MeetingContext } from '../lib/context/token';
+import { MeetingContext } from '../lib/context/tokenContext';
 
-const VirtualBackgroundModal = ({ showModal, setShowModal }) => {
+interface VirtualBackgroundModalProps {
+	/* Visibility of the modal */
+	showModal: boolean;
+
+	/* Control the visibility of the modal */
+	setShowModal: Dispatch<SetStateAction<boolean>>;
+}
+
+// Virtual Background Modal shows a list of images to choose from
+const VirtualBackgroundModal: React.FC<VirtualBackgroundModalProps> = ({
+	showModal,
+	setShowModal
+}) => {
 	const links = [
 		'/bg-1.jpg',
 		'/bg-2.jpg',
@@ -12,8 +25,8 @@ const VirtualBackgroundModal = ({ showModal, setShowModal }) => {
 		'/bg-5.jpg',
 		'/bg-6.jpeg'
 	];
-	const { userBgLink, setUserBgLink, userBackground, setUserBackground } =
-		useContext(MeetingContext);
+	const { userBgLink, setUserBgLink, setUserBackground } =
+		useContext(MeetingContext); // Sets the current background image in context
 
 	return (
 		<Modal
@@ -26,7 +39,7 @@ const VirtualBackgroundModal = ({ showModal, setShowModal }) => {
 				Choose from a variety of backgrounds!
 			</Modal.Subtitle>
 			<Modal.Content className="mx-auto grid grid-cols-1 md:grid-cols-3 gap-2">
-				{links.map((link) => (
+				{links.map((link: string) => (
 					<div key={link} className="relative">
 						<Image
 							onClick={() => console.log('lcocakc')}
@@ -40,9 +53,13 @@ const VirtualBackgroundModal = ({ showModal, setShowModal }) => {
 								icon={<CheckInCircle />}
 								auto
 								type={
-									userBgLink === link ? 'success-light' : 'default'
+									// Highlights the chosen image
+									userBgLink === link
+										? 'success-light'
+										: 'default'
 								}
 								onClick={() => {
+									// Sets the current virtual background as the selected image
 									setUserBgLink(link);
 									setUserBackground('virtual');
 									setTimeout(() => {
@@ -60,6 +77,7 @@ const VirtualBackgroundModal = ({ showModal, setShowModal }) => {
 				passive
 				type="error"
 				onClick={() => {
+					// Clears the Background
 					setUserBgLink('');
 					setUserBackground('');
 					setShowModal(false);

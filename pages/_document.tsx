@@ -1,9 +1,21 @@
 /* eslint-disable @next/next/no-img-element */
-import Document, { Html, Head, Main, NextScript } from 'next/document';
+import Document, {
+	Html,
+	Head,
+	Main,
+	NextScript,
+	DocumentContext
+} from 'next/document';
 import { CssBaseline } from '@geist-ui/react';
 
+/**
+ * Used to augment the app's html.
+ *
+ * @class MyDocument
+ * @extends {Document}
+ */
 class MyDocument extends Document {
-	static async getInitialProps(ctx) {
+	static async getInitialProps(ctx: DocumentContext) {
 		const initialProps = await Document.getInitialProps(ctx);
 		const styles = CssBaseline.flush();
 
