@@ -1,0 +1,57 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Service {
+  id String [pk]
+  host String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  sessions Session [not null]
+}
+
+Table NetworkLogs {
+  id Int [pk, increment]
+  meetingId String [not null]
+  audioRecv Int [not null]
+  audioSend Int [not null]
+  videoRecv Int [not null]
+  videoSend Int [not null]
+}
+
+Table Session {
+  id Int [pk, increment]
+  query Json
+  headers Json [not null]
+  device Device [not null]
+  deviceId Int [not null]
+  network Network [not null]
+  networkId Int [not null]
+  time DateTime [default: `now()`, not null]
+  service Service
+  serviceId String
+}
+
+Table Device {
+  id Int [pk, increment]
+  browser String [not null]
+  os String [not null]
+  platform String [not null]
+  engine String [not null]
+  Session Session [not null]
+}
+
+Table Network {
+  id Int [pk, increment]
+  ip String [not null]
+  asn String [not null]
+  city String [not null]
+  country String [not null]
+  map String [not null]
+  Session Session [not null]
+}
+
+Ref: Session.deviceId > Device.id
+
+Ref: Session.networkId > Network.id
+
+Ref: Session.serviceId > Service.host

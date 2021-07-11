@@ -14,13 +14,15 @@ import {
 import { XCircleFill, PlusCircle } from '@geist-ui/react-icons';
 import { useSession } from 'next-auth/client';
 import { useRouter } from 'next/router';
+import { useCallback } from 'react';
 import { useContext, useEffect, useState } from 'react';
 import { FaRegKeyboard } from 'react-icons/fa';
-import { MeetingContext } from '../lib/context/tokenContext';
+import { MeetingContext } from '../lib/context/MeetingContext';
+import Head from 'next/head';
 
 const Home = (): JSX.Element => {
 	const [session] = useSession(); // Fetches the (logged-in) user's session, otherwise null
-	const { push } = useRouter(); // Client side router pusher
+	const { push, query } = useRouter(); // Client side router pusher
 	const [_toasts, setToast] = useToasts(); // Toasts Alerts
 	const { setToken } = useContext(MeetingContext); // Sets the token on joining a meeting
 	const [joinRoom, setJoinRoom] = useState<string>(''); // Manages user entered room name
@@ -47,14 +49,29 @@ const Home = (): JSX.Element => {
 		push(`/${data.room}`);
 	};
 
+	const showErrorToast = useCallback(async () => {
+		setToast({
+			text: 'Please log in first!',
+			type: 'error'
+		});
+	}, [setToast]);
+
 	useEffect(() => {
 		// Shows previous meeting if any
+		if (query.login === 'false') showErrorToast();
 		let prevMeeingId = window.localStorage.getItem('prevMeeting');
 		if (prevMeeingId) setPrevMeeting(prevMeeingId);
-	}, []);
+	}, [query.login]);
 
 	return (
 		<>
+			<Head>
+				<title>Microsoft Teams</title>
+				<meta
+					name="viewport"
+					content="initial-scale=1.0, width=device-width"
+				/>
+			</Head>
 			<Row>
 				<Col>
 					<Text h2>Microsoft Teams</Text>
@@ -76,11 +93,7 @@ const Home = (): JSX.Element => {
 										text: 'Meeting Started',
 										type: 'success'
 									});
-								} else
-									setToast({
-										text: 'Please log in first!',
-										type: 'error'
-									});
+								} else void showErrorToast();
 							}}
 						>
 							New Meeting
@@ -96,11 +109,7 @@ const Home = (): JSX.Element => {
 										type: 'success'
 									});
 									push(`/${joinRoom}`);
-								} else
-									setToast({
-										text: 'Please log in first!',
-										type: 'error'
-									});
+								} else void showErrorToast();
 							}}
 						>
 							<Input

@@ -6,7 +6,7 @@ import {
 	Dispatch,
 	SetStateAction
 } from 'react';
-import { MeetingContext } from '../lib/context/tokenContext';
+import { MeetingContext } from '../lib/context/MeetingContext';
 import { API_BASE_URL } from '../lib/config';
 import { Mic, MicOff, Camera, CameraOff } from '@geist-ui/react-icons';
 import { Card } from '@geist-ui/react';

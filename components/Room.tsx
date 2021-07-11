@@ -18,7 +18,7 @@ import {
 	MessageSquare
 } from '@geist-ui/react-icons';
 import { GiPartyPopper } from 'react-icons/gi';
-import { MeetingContext } from '../lib/context/tokenContext';
+import { MeetingContext } from '../lib/context/MeetingContext';
 import ControlButton, { ChangeBackground, EndCall } from './ControlButton';
 import VirtualBackgroundModal from './VirtualBackground';
 import ChatPanel from './Chat';

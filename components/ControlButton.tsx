@@ -3,7 +3,7 @@ import { Tooltip, useTheme } from '@geist-ui/react';
 import { Toast } from '@geist-ui/react/dist/use-toasts/use-toast';
 import React, { useContext } from 'react';
 import { Room } from 'twilio-video';
-import { MeetingContext } from '../lib/context/tokenContext';
+import { MeetingContext } from '../lib/context/MeetingContext';
 
 interface EndCallProps {
 	/* Current Room */

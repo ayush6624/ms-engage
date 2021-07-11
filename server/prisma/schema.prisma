@@ -10,6 +10,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+
 model Service {
   id        String    @id @default(cuid())
   host      String    @unique

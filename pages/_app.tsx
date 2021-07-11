@@ -5,7 +5,7 @@ import { GeistProvider, CssBaseline, Page } from '@geist-ui/react';
 import { useState, useEffect } from 'react';
 import { Provider } from 'next-auth/client';
 import { Header } from '../components/Header';
-import { MeetingProvider } from '../lib/context/tokenContext';
+import { MeetingProvider } from '../lib/context/MeetingContext';
 import { ConnectionContextProvider } from '../lib/context/ConnectionContext';
 import { ThemeType } from '../lib/types';
 

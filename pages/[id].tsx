@@ -1,5 +1,5 @@
 import { useContext, useEffect } from 'react';
-import { MeetingContext } from '../lib/context/tokenContext';
+import { MeetingContext } from '../lib/context/MeetingContext';
 import Room from '../components/Room';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/client';
@@ -8,6 +8,7 @@ import ChatPanel from '../components/Chat';
 import { PlusCircle } from '@geist-ui/react-icons';
 import { Grid, Text, Card, Button, useToasts, Divider } from '@geist-ui/react';
 import { InviteMember } from '../components/Invite';
+import Head from 'next/head';
 
 // Renders the Meeting's Room
 const RoomPage = (): JSX.Element => {
@@ -33,17 +34,15 @@ const RoomPage = (): JSX.Element => {
 
 	useEffect(() => {
 		if (socketConnected.current) {
-			joinRoom();
-			receiveMessages();
-			receiveCelebration();
+			joinRoom(); // joins the room
+			receiveMessages(); // Socket listener for celebration events
+			receiveCelebration(); // Socket listener for receiving messages
 		}
 	}, [socketConnected.current]);
 
 	if (loading) return <div>Authenticating</div>; // If loading user auth state, return a loading message
 	if (session === null) {
-		//If not logged in, redirect to home page
-		setToast({ text: 'Please log in first', type: 'error' });
-		push('/');
+		window.location.replace('/?login=false');
 		return <div>Please login first!</div>;
 	}
 	if (token === '') {
@@ -64,6 +63,9 @@ const RoomPage = (): JSX.Element => {
 
 	return (
 		<div>
+			<Head>
+				<title>Teams - {query.id}</title>
+			</Head>
 			{!showMeeting && (
 				// Show room metadata before joining the room
 				<div>

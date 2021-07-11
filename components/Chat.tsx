@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { Button, Input, Divider, Text } from '@geist-ui/react';
+import { Button, Input, Divider, Text, useTheme } from '@geist-ui/react';
 import { Send } from '@geist-ui/react-icons';
 import { useConnectionContext } from '../lib/context/ConnectionContext';
 
 const ChatPanel: React.FC<{}> = () => {
 	const [message, setMessage] = useState<string>(''); // current message
 	const { user, sendMessage, chats } = useConnectionContext();
+	const theme = useTheme();
 	return (
-		<div className="right-0 bottom-0 fixed mr-5 mb-8 pt-3 border px-2 z-50 bg-white">
-			<Text>Chat</Text>
+		<div
+			className={`right-0 bottom-0 fixed mr-5 mb-8 pt-3 border px-2 z-50 ${
+				theme.type === 'light' ? 'bg-white' : 'bg-black'
+			}`}
+		>
+			<Text className="mx-2">Chat</Text>
 			<Divider y={1} />
 			<div
 				id="chatbox"
