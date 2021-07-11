@@ -34,7 +34,6 @@ const Room: React.FC<RoomProps> = ({ roomName, token }) => {
 	const [room, setRoom] = useState<RoomType>(null);
 	const [showBgModal, setShowBgModal] = useState(false);
 	const [participants, setParticipants] = useState<RemoteParticipant[]>([]);
-	const [showConfetti, setShowConfetti] = useState(false);
 	const [mic, setMic] = useState<boolean>(true);
 	const [camera, setCamera] = useState<boolean>(true);
 	const [shareModal, setShareModal] = useState<boolean>(false);
@@ -43,7 +42,7 @@ const Room: React.FC<RoomProps> = ({ roomName, token }) => {
 	const [showChatPanel, setShowChatPanel] = useState<boolean>(false);
 	const [, setToast] = useToasts();
 	const { userBackground } = useContext(MeetingContext);
-	const { celebrate } = useConnectionContext();
+	const { celebrate, showConfetti, setShowConfetti } = useConnectionContext();
 
 	const shareScreenHandler = async () => {
 		if (!screenTrack) {
@@ -184,11 +183,10 @@ const Room: React.FC<RoomProps> = ({ roomName, token }) => {
 							state={!mic}
 							onClick={() => {
 								room.localParticipant.audioTracks.forEach(
-									(publication) => {
+									(publication) =>
 										mic
 											? publication.track.disable()
-											: publication.track.enable();
-									}
+											: publication.track.enable()
 								);
 								setMic(!mic);
 							}}
@@ -202,11 +200,10 @@ const Room: React.FC<RoomProps> = ({ roomName, token }) => {
 							state={!camera}
 							onClick={() => {
 								room.localParticipant.videoTracks.forEach(
-									(publication) => {
+									(publication) =>
 										camera
 											? publication.track.disable()
-											: publication.track.enable();
-									}
+											: publication.track.enable()
 								);
 								setCamera(!camera);
 							}}
@@ -247,9 +244,9 @@ const Room: React.FC<RoomProps> = ({ roomName, token }) => {
 						<ControlButton
 							toolTipText={'Chat'}
 							state={showChatPanel}
-							onClick={async () => {
-								setShowChatPanel(!showChatPanel);
-							}}
+							onClick={async () =>
+								setShowChatPanel(!showChatPanel)
+							}
 							icon={<MessageSquare />}
 						/>
 					</li>
