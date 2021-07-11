@@ -1,11 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
-import { getDashboardData, getServiceLogs, storeNetworkLogs } from './src/db';
+import { getServiceLogs, storeNetworkLogs } from './src/db';
 import { pixelHelper, sendEmail } from './src/util';
 import sockerServer from './src/socket';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient(); // Instantiate the prisma client
 const app = express();
 
 app.set('port', process.env.PORT || 3001);
@@ -22,28 +22,24 @@ app.get('/', (req, res) => {
 });
 
 app.post('/health', async (req, res) => {
-	console.log(req.body);
-	await storeNetworkLogs(req.body);
+	await storeNetworkLogs(req.body); // Stores the Video Call Network quality in the DB
 	res.send({ status: 'ok' });
 });
 
 app.post('/invite', async (req, res) => {
 	const { email, id } = req.body;
-	await sendEmail({ email, id });
+	await sendEmail({ email, id }); // Sends an invitation email with the associated roomname
 	res.send({ success: 'true' });
 });
 
 app.get('/:id/hello.png', async (req, res) => {
+	// Pixel Tracking
 	const service_id: string = req.params.id;
 	await pixelHelper(service_id, req, res);
 });
 
-app.get('/service', async (req, res) => {
-	const data = await getDashboardData();
-	res.json({ data });
-});
-
 app.get('/service/:id/logs', async (req, res) => {
+	// get logs of all the network events (paginated)
 	if (typeof req.query.paginate === 'undefined') {
 		res.send({ message: 'Include ?paginate=N in the query!' });
 		res.end();

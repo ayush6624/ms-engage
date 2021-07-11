@@ -2,6 +2,12 @@ import { NetworkLogs, Service } from '@prisma/client';
 import { prisma } from '../index';
 import { Analytics, ServiceStatus } from './types';
 
+/**
+ * Stores the Network logs
+ *
+ * @param {NetworkLogs} data
+ * @return {*}  {Promise<void>}
+ */
 async function storeNetworkLogs(data: NetworkLogs): Promise<void> {
   try {
     await prisma.networkLogs.create({
@@ -13,6 +19,12 @@ async function storeNetworkLogs(data: NetworkLogs): Promise<void> {
 }
 
 
+/**
+ * Insert the current session with all the metadata
+ *
+ * @param {Analytics} data
+ * @return {*}  {Promise<void>}
+ */
 async function insertSession(data: Analytics): Promise<void> {
   try {
     if (data.network.city === undefined) data.network.city = 'NA';
@@ -49,16 +61,13 @@ async function insertSession(data: Analytics): Promise<void> {
   }
 }
 
-async function getDashboardData(): Promise<ServiceStatus[]> {
-  const data: ServiceStatus[] = await prisma.service.findMany({
-    select: {
-      id: true,
-      host: true,
-    },
-  });
-  return data;
-}
-
+/**
+ * Return all the data of the requests
+ *
+ * @param {string} id
+ * @param {string} paginate
+ * @return {*} 
+ */
 async function getServiceLogs(id: string, paginate: string) {
   const data = await prisma.session.findMany({
     where: {
@@ -76,6 +85,5 @@ async function getServiceLogs(id: string, paginate: string) {
 export {
   storeNetworkLogs,
   insertSession,
-  getDashboardData,
   getServiceLogs,
 };
